@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+uv.lock
+
+# Node
+node_modules/
+frontend/dist/
+
+# Go
+backend/emoons-web
+backend/tmp/
+backend/.air.toml
+
+# Data and generated files
+data/
+plots/
+db/
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local

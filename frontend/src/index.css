@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: 100vh;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* Blend plot images in dark mode so white background matches page */
+[data-theme="dark"] .dark-invert {
+  filter: invert(1) hue-rotate(180deg);
+  mix-blend-mode: lighten;
+}

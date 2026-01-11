@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./plots:/plots:ro
+      - ./db:/db
+    environment:
+      - DATABASE_PATH=/db/transit_analysis.db
+      - CSV_PATH=/plots/transit_summary.csv
+      - PLOTS_DIR=/plots
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+    restart: unless-stopped
