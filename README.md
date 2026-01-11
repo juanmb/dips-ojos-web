@@ -1,4 +1,4 @@
-# EMoons Web
+# Dips OjOs Web
 
 Web application for exoplanet transit light curve classification. Allows users to visually inspect transit plots and classify morphological features, asymmetries, and anomalies.
 
@@ -14,90 +14,68 @@ Web application for exoplanet transit light curve classification. Allows users t
 
 - **Backend**: Go + Gin + SQLite
 - **Frontend**: Preact + DaisyUI + Vite
-- **Plot Generator**: Python + Batman transit model (run locally before deployment)
+- **Plot Generator**: Python + Batman transit model
 
 ## Quick Start
 
-### 1. Generate Transit Plots
-
-First, generate the transit plots from your light curve CSV files:
-
 ```bash
-cd plotter
+# Initialize environment (creates directories and .env)
+make setup
 
-# Install Python dependencies
-uv sync
+# Copy your light curve CSV files to data/
+cp /path/to/your/*.csv data/
 
-# Generate all plots
-uv run python generate_plots.py -i /path/to/csv/files -o ../plots
+# Generate transit plots
+make plots
 
-# Or with verbose output
-uv run python generate_plots.py -i /path/to/csv/files -o ../plots -v
-```
-
-### 2. Deploy with Docker Compose
-
-```bash
-# Create database directory
-mkdir -p db
-
-# Start the application
-docker compose up -d
+# Build and start the application
+make docker-build
+make docker-up
 
 # Access at http://localhost:8080
 ```
 
-## Development Setup
+## Make Targets
 
-### Backend
-
-```bash
-cd backend
-go run .
+```
+make setup          Initialize development environment
+make plots          Generate transit plots from data/ to plots/
+make plots-force    Regenerate all plots (even existing ones)
+make docker-build   Build Docker image
+make docker-up      Start application with Docker Compose
+make docker-down    Stop application
+make docker-logs    Show application logs
+make dev-backend    Run backend in development mode
+make dev-frontend   Run frontend in development mode
+make clean          Remove generated files
 ```
 
-Environment variables:
-- `DATABASE_PATH`: Path to SQLite database (default: `../../transit_analysis.db`)
-- `CSV_PATH`: Path to transit summary CSV (default: `../../plots/transit_summary.csv`)
-- `PLOTS_DIR`: Directory containing plot images (default: `../../plots`)
-- `FRONTEND_DIR`: Path to built frontend assets (empty = disabled, for dev with Vite proxy)
+## Development
+
+Run backend and frontend in separate terminals:
+
+```bash
+# Terminal 1: Backend
+make dev-backend
+
+# Terminal 2: Frontend
+make dev-frontend
+```
+
+### Environment Variables
+
+- `DATABASE_PATH`: SQLite database path (default: `../db/transit_analysis.db`)
+- `CSV_PATH`: Transit summary CSV (default: `../plots/transit_summary.csv`)
+- `PLOTS_DIR`: Plot images directory (default: `../plots`)
+- `FRONTEND_DIR`: Built frontend assets (empty = dev mode with Vite proxy)
 - `JWT_SECRET`: Secret key for JWT tokens
 - `PORT`: Server port (default: `8080`)
 
-### Frontend
-
-```bash
-cd frontend
-pnpm install
-pnpm run dev
-```
-
-### Plot Generator
-
-```bash
-cd plotter
-
-# Install dependencies
-uv sync
-
-# Generate all plots
-uv run python generate_plots.py -i ../data -o ../plots
-
-# Generate specific file with verbose output
-uv run python generate_plots.py -f Corot1b.csv -v
-
-# Force regeneration of existing plots
-uv run python generate_plots.py --force
-
-# Dry run (list files without processing)
-uv run python generate_plots.py --dry-run
-```
-
 ## Data Format
 
-### Light Curve CSV Files
+### Input CSV Files
 
-Each CSV file should contain:
+Place CSV files in `data/`. Each file should contain:
 
 1. **Header metadata** with orbital parameters:
    - `Orbit Period (days)`
@@ -110,15 +88,13 @@ Each CSV file should contain:
    - `Tiempo [BJDS]`: Time in BJD
    - `Flujo`: Normalized flux
 
-### Generated Files
+### Output Files
 
-The plot generator creates:
-- `plots/*.png`: Individual transit plot images
-- `plots/transit_summary.csv`: Transit metadata for all processed files
+The plot generator creates in `plots/`:
+- `*.png`: Individual transit plot images
+- `transit_summary.csv`: Transit metadata for all processed files
 
 ## User Management
-
-Create users directly in the SQLite database:
 
 ```bash
 sqlite3 db/transit_analysis.db
@@ -127,7 +103,7 @@ INSERT INTO Usuarios (username, password, fullname)
 VALUES ('user', '<bcrypt-hash>', 'Full Name');
 ```
 
-To generate a bcrypt hash:
+Generate bcrypt hash:
 ```python
 import bcrypt
 print(bcrypt.hashpw(b"password", bcrypt.gensalt()).decode())
@@ -135,20 +111,21 @@ print(bcrypt.hashpw(b"password", bcrypt.gensalt()).decode())
 
 ## Classification Fields
 
-- **Morfología Normal**: Normal transit shape
-- **Morfología Anómala**: Anomalous transit shape
+- **Morfología Normal/Anómala**: Transit shape classification
 - **Asimetría Izquierda/Derecha**: Left/Right asymmetry
-- **Aumento/Disminución Flujo Interior**: Flux increase/decrease during transit
+- **Aumento/Disminución Flujo Interior**: Flux variation during transit
 - **TDV Marcada**: Marked Transit Duration Variation
 - **Notas**: Free-form notes
 
 ## Keyboard Shortcuts
 
-- `←` / `A`: Previous transit
-- `→` / `D`: Next transit
-- `↑` / `W`: Previous curve
-- `↓` / `S`: Next curve
-- `?`: Show help
+| Key | Action |
+|-----|--------|
+| `←` / `A` | Previous transit |
+| `→` / `D` | Next transit |
+| `↑` / `W` | Previous curve |
+| `↓` / `S` | Next curve |
+| `?` | Show help |
 
 ## License
 

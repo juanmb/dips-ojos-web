@@ -12,3 +12,20 @@ services:
       - PLOTS_DIR=/plots
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
     restart: unless-stopped
+
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.emoons.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.emoons.entrypoints=websecure"
+      - "traefik.http.routers.emoons.tls.certresolver=myresolver"
+
+      - "traefik.http.routers.emoons-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.emoons-http.entrypoints=web"
+      - "traefik.http.routers.emoons-http.middlewares=emoons-https"
+
+      - "traefik.http.middlewares.emoons-https.redirectscheme.scheme=https"
+
+networks:
+  traefik:
+    external: true

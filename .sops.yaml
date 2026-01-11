@@ -1,0 +1,7 @@
+creation_rules:
+  # Encrypt .env files with age
+  - path_regex: .*\.env(\.enc)?$
+    age: >-
+      age1mnsw6jxyyshnsx320m35n694nrp0z8ahdl9z4ea9xk5x57xekuhqe6zlly,
+      age139q86qdecrjgcd355lxdl2mnkgetjs3zyj2pgtqmtdu6qz6uts5sesdywf
+    encrypted_regex: ^(HOSTNAME|DATABASE_PATH|.*PASSWORD.*|.*SECRET.*)$

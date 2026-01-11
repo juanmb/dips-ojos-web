@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+
+# Data and generated files
+data/
+plots/
+db/
+
+# Python (plotter not needed in Docker image)
+plotter/
+__pycache__/
+*.py[cod]
+.venv/
+.uv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Go build artifacts
+backend/emoons-web
+backend/tmp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs
+README.md
+LICENSE
