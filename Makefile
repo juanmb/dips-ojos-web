@@ -1,4 +1,4 @@
-.PHONY: help setup plots plots-force docker-build docker-up docker-down docker-logs dev-backend dev-frontend dev clean
+.PHONY: help setup plots plots-force docker-build docker-up docker-down docker-logs dev-backend dev-frontend dev clean encrypt decrypt
 
 help:
 	@echo "Usage: make <target>"
@@ -15,6 +15,8 @@ help:
 	@echo "  dev-frontend  Run frontend in development mode"
 	@echo "  dev           Run both backend and frontend (requires 2 terminals)"
 	@echo "  clean         Remove generated files"
+	@echo "  encrypt       Encrypt .env to .env.enc with sops"
+	@echo "  decrypt       Decrypt .env.enc to .env with sops"
 
 # Setup
 setup:
@@ -61,3 +63,10 @@ clean:
 	rm -rf frontend/dist
 	rm -rf backend/emoons-web backend/tmp
 	rm -rf plotter/.venv
+
+# Secrets
+encrypt:
+	sops -e --input-type dotenv --output-type dotenv .env > .env.enc
+
+decrypt:
+	sops -d --input-type dotenv --output-type dotenv .env.enc > .env
