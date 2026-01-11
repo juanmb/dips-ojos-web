@@ -24,6 +24,7 @@ func init() {
 type Claims struct {
 	UserID   int64  `json:"user_id"`
 	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -31,6 +32,7 @@ func GenerateToken(user *models.User) (string, error) {
 	claims := Claims{
 		UserID:   user.ID,
 		Username: user.Username,
+		IsAdmin:  user.IsAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -72,6 +74,18 @@ func AuthRequired() gin.HandlerFunc {
 
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
+		c.Set("is_admin", claims.IsAdmin)
+		c.Next()
+	}
+}
+
+func AdminRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !GetIsAdmin(c) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
@@ -81,4 +95,11 @@ func GetUserID(c *gin.Context) int64 {
 		return id.(int64)
 	}
 	return 0
+}
+
+func GetIsAdmin(c *gin.Context) bool {
+	if isAdmin, exists := c.Get("is_admin"); exists {
+		return isAdmin.(bool)
+	}
+	return false
 }

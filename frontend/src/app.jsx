@@ -1,28 +1,113 @@
 import { useState, useEffect, useCallback } from 'preact/hooks'
-import { isAuthenticated, logout } from './stores/auth.js'
+import Router, { route } from 'preact-router'
+import { isAuthenticated, isAdmin, logout } from './stores/auth.js'
 import { api } from './api/client.js'
 import { Login } from './components/Login.jsx'
 import { CurveList } from './components/CurveList.jsx'
 import { TransitViewer } from './components/TransitViewer.jsx'
 import { StatsPanel } from './components/StatsPanel.jsx'
+import { AdminPanel } from './components/AdminPanel.jsx'
+import { UserDetail } from './components/UserDetail.jsx'
+
+function MainView({ curves, selectedCurve, setSelectedCurve, refreshKey, onClassificationSaved, navigateCurve }) {
+  return (
+    <div class="drawer lg:drawer-open flex-1 min-h-0">
+      <input id="sidebar-drawer" type="checkbox" class="drawer-toggle" />
+
+      <div class="drawer-content flex flex-col overflow-hidden">
+        <TransitViewer
+          curve={selectedCurve}
+          onClassificationSaved={onClassificationSaved}
+          onNextCurve={() => navigateCurve('next')}
+          onPrevCurve={() => navigateCurve('prev')}
+        />
+      </div>
+
+      <div class="drawer-side z-40 h-full">
+        <label for="sidebar-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <div class="w-80 h-full bg-base-100 flex flex-col overflow-hidden border-r border-base-300">
+          <div class="flex-none p-2 border-b border-base-300">
+            <StatsPanel refreshTrigger={refreshKey} />
+          </div>
+
+          <div class="flex-1 min-h-0 overflow-hidden">
+            <CurveList
+              curves={curves}
+              selectedCurve={selectedCurve}
+              onSelectCurve={setSelectedCurve}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AdminView() {
+  return (
+    <div class="flex-1 min-h-0 overflow-hidden">
+      <AdminPanel />
+    </div>
+  )
+}
+
+function UserDetailView({ id }) {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadUser()
+  }, [id])
+
+  const loadUser = async () => {
+    try {
+      setLoading(true)
+      const users = await api.getUsers()
+      const found = users.find(u => u.id === parseInt(id))
+      setUser(found || null)
+    } catch (err) {
+      console.error('Failed to load user:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div class="flex-1 min-h-0 overflow-hidden flex justify-center items-center">
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div class="flex-1 min-h-0 overflow-hidden p-4">
+        <div class="alert alert-error">User not found</div>
+        <button class="btn btn-ghost mt-4" onClick={() => route('/admin')}>
+          Back to Admin
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div class="flex-1 min-h-0 overflow-hidden">
+      <UserDetail user={user} />
+    </div>
+  )
+}
 
 export function App() {
   const [curves, setCurves] = useState([])
   const [selectedCurve, setSelectedCurve] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showHelp, setShowHelp] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark'
-  })
+  const [currentPath, setCurrentPath] = useState('/')
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
-  const toggleTheme = () => {
-    setTheme(t => t === 'dark' ? 'light' : 'dark')
-  }
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated.value) {
@@ -52,6 +137,7 @@ export function App() {
   const handleLogout = () => {
     logout()
     setSelectedCurve(null)
+    route('/')
   }
 
   const navigateCurve = useCallback((direction) => {
@@ -73,10 +159,12 @@ export function App() {
     }
   }, [curves, selectedCurve])
 
-  // Keyboard shortcut for help (global)
+  const handleRouteChange = (e) => {
+    setCurrentPath(e.url)
+  }
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore text inputs but allow checkboxes
       if (e.target.tagName === 'TEXTAREA') return
       if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') return
       if (e.key === '?' || e.key === 'h') {
@@ -136,41 +224,53 @@ export function App() {
     </dialog>
   )
 
+  const isAdminRoute = currentPath.startsWith('/admin')
+
   return (
     <div class="h-screen flex flex-col">
       {/* Fixed top navbar */}
       <div class="navbar bg-base-100 border-b border-base-300 flex-none">
-        {/* Mobile menu toggle */}
+        {/* Mobile menu toggle - only show on main view */}
         <div class="flex-none lg:hidden">
-          <label for="sidebar-drawer" class="btn btn-square btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </label>
+          {!isAdminRoute && (
+            <label for="sidebar-drawer" class="btn btn-square btn-ghost">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </label>
+          )}
         </div>
 
-        {/* Title */}
+        {/* Title - clickable to go home */}
         <div class="flex-1 pl-4">
-          <span class="text-xl font-bold">Dips OjOs</span>
+          <a href="/" class="text-xl font-bold hover:opacity-80 transition-opacity">Dips OjOs</a>
         </div>
 
-        {/* Right side: theme, help, logout */}
+        {/* Right side: admin, help, logout */}
         <div class="flex-none flex items-center gap-1">
-          <button
-            class="btn btn-sm btn-ghost btn-circle"
-            onClick={toggleTheme}
-            title="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
+          {isAdmin.value && (
+            <a
+              href={isAdminRoute ? '/' : '/admin'}
+              class={`btn btn-sm btn-ghost ${isAdminRoute ? 'btn-active' : ''}`}
+              title={isAdminRoute ? 'Back to Classifier' : 'Admin Panel'}
+            >
+              {isAdminRoute ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                  <span class="hidden sm:inline ml-1">Classifier</span>
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <span class="hidden sm:inline ml-1">Admin</span>
+                </>
+              )}
+            </a>
+          )}
 
           <button
             class="btn btn-sm btn-ghost btn-circle"
@@ -194,40 +294,20 @@ export function App() {
         </div>
       </div>
 
-      {/* Main content with drawer */}
-      <div class="drawer lg:drawer-open flex-1 min-h-0">
-        <input id="sidebar-drawer" type="checkbox" class="drawer-toggle" />
-
-        {/* Main content */}
-        <div class="drawer-content flex flex-col overflow-hidden">
-          <TransitViewer
-            curve={selectedCurve}
-            onClassificationSaved={handleClassificationSaved}
-            onNextCurve={() => navigateCurve('next')}
-            onPrevCurve={() => navigateCurve('prev')}
-          />
-        </div>
-
-        {/* Sidebar */}
-        <div class="drawer-side z-40 h-full">
-          <label for="sidebar-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-          <div class="w-80 h-full bg-base-100 flex flex-col overflow-hidden border-r border-base-300">
-            {/* Stats - fixed */}
-            <div class="flex-none p-2 border-b border-base-300">
-              <StatsPanel refreshTrigger={refreshKey} />
-            </div>
-
-            {/* Curve list - scrollable */}
-            <div class="flex-1 min-h-0 overflow-hidden">
-              <CurveList
-                curves={curves}
-                selectedCurve={selectedCurve}
-                onSelectCurve={setSelectedCurve}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Router content */}
+      <Router onChange={handleRouteChange}>
+        <MainView
+          path="/"
+          curves={curves}
+          selectedCurve={selectedCurve}
+          setSelectedCurve={setSelectedCurve}
+          refreshKey={refreshKey}
+          onClassificationSaved={handleClassificationSaved}
+          navigateCurve={navigateCurve}
+        />
+        <AdminView path="/admin" />
+        <UserDetailView path="/admin/users/:id" />
+      </Router>
 
       <HelpDialog />
     </div>

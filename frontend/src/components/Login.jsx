@@ -1,27 +1,27 @@
-import { useState } from 'preact/hooks'
-import { api } from '../api/client.js'
-import { setAuth } from '../stores/auth.js'
+import { useState } from "preact/hooks";
+import { api } from "../api/client.js";
+import { setAuth } from "../stores/auth.js";
 
 export function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const data = await api.login(username, password)
-      setAuth(data.token, data.user)
+      const data = await api.login(username, password);
+      setAuth(data.token, data.user);
     } catch (err) {
-      setError(err.message || 'Login failed')
+      setError(err.message || "Login failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div
@@ -31,11 +31,15 @@ export function Login() {
       <div class="card w-96 bg-base-100/80 backdrop-blur-sm shadow-xl">
         <div class="card-body">
           <div class="flex justify-center mb-2">
-            <a href="https://www.observatoriomontedeva.com/" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.observatoriomontedeva.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
                 src="/logo.jpg"
                 alt="Dips OjOs"
-                title="En recuerdo de nuestro compañero Jose Ramón Vidal (1947-2025)"
+                title="Jose Ramón Vidal (1947-2025)"
                 class="w-24 h-24 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
               />
             </a>
@@ -79,15 +83,15 @@ export function Login() {
             <div class="form-control">
               <button
                 type="submit"
-                class={`btn btn-primary ${loading ? 'loading' : ''}`}
+                class={`btn btn-primary ${loading ? "loading" : ""}`}
                 disabled={loading}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  )
+  );
 }

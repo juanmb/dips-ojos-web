@@ -155,3 +155,14 @@ func GetTransitCount(filename string) int {
 	}
 	return 0
 }
+
+func GetTotalTransitCount() int {
+	transitCacheLock.RLock()
+	defer transitCacheLock.RUnlock()
+
+	total := 0
+	for _, transits := range transitCache {
+		total += len(transits)
+	}
+	return total
+}

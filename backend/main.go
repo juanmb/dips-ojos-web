@@ -28,6 +28,8 @@ func main() {
 	plotsDir := getEnv("PLOTS_DIR", "../plots")
 	frontendDir := getEnv("FRONTEND_DIR", "")
 	port := getEnv("PORT", "8080")
+	adminUsername := getEnv("ADMIN_USERNAME", "admin")
+	adminPassword := getEnv("ADMIN_PASSWORD", "admin")
 
 	// Connect to database
 	if err := db.Connect(dbPath); err != nil {
@@ -38,6 +40,11 @@ func main() {
 	// Run migrations
 	if err := db.RunMigrations(); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
+	// Ensure admin user exists
+	if err := models.EnsureAdminUser(adminUsername, adminPassword); err != nil {
+		log.Fatalf("Failed to ensure admin user: %v", err)
 	}
 
 	// Load transit data from CSV
@@ -89,6 +96,18 @@ func main() {
 
 		// Stats
 		api.GET("/stats", handlers.GetStats)
+
+		// Admin routes
+		admin := api.Group("/admin")
+		admin.Use(middleware.AdminRequired())
+		{
+			admin.GET("/users", handlers.ListUsers)
+			admin.POST("/users", handlers.CreateUser)
+			admin.PUT("/users/:id", handlers.UpdateUser)
+			admin.DELETE("/users/:id", handlers.DeleteUser)
+			admin.GET("/users/:id/stats", handlers.GetUserStats)
+			admin.GET("/users/:id/export", handlers.ExportUserClassifications)
+		}
 	}
 
 	// Serve frontend static files (for production)

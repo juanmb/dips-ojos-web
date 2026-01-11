@@ -21,6 +21,7 @@ const stored = loadFromStorage()
 export const token = signal(stored.token)
 export const user = signal(stored.user)
 export const isAuthenticated = computed(() => !!token.value)
+export const isAdmin = computed(() => !!user.value?.is_admin)
 
 export function setAuth(newToken, newUser) {
   token.value = newToken

@@ -16,7 +16,7 @@ backend/.air.toml
 # Data and generated files
 data/
 plots/
-db/
+/db/
 *.db
 
 # IDE

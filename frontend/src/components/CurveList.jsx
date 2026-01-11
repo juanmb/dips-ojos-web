@@ -2,8 +2,9 @@ import { useState, useRef } from 'preact/hooks'
 
 export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
   const [filter, setFilter] = useState('')
-  const [activeTab, setActiveTab] = useState('pending')
+  const [activeTab, setActiveTab] = useState('all')
 
+  const allListRef = useRef(null)
   const pendingListRef = useRef(null)
   const completedListRef = useRef(null)
 
@@ -15,14 +16,18 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
     return total > 0 && classified >= total
   }
 
-  const pendingCurves = curves
+  const filteredCurves = curves
     .filter(curve => getCurveName(curve).toLowerCase().includes(filter.toLowerCase()))
+
+  const allCurves = filteredCurves
+
+  const pendingCurves = filteredCurves
     .filter(curve => !isCompleted(curve))
 
-  const completedCurves = curves
-    .filter(curve => getCurveName(curve).toLowerCase().includes(filter.toLowerCase()))
+  const completedCurves = filteredCurves
     .filter(curve => isCompleted(curve))
 
+  const allCount = curves.length
   const pendingCount = curves.filter(c => !isCompleted(c)).length
   const completedCount = curves.filter(c => isCompleted(c)).length
 
@@ -82,6 +87,12 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
       <div class="flex-none border-b border-base-300">
         <div class="tabs tabs-boxed bg-transparent p-1">
           <a
+            class={`tab tab-sm flex-1 ${activeTab === 'all' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('all')}
+          >
+            All ({allCount})
+          </a>
+          <a
             class={`tab tab-sm flex-1 ${activeTab === 'pending' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('pending')}
           >
@@ -96,7 +107,14 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
         </div>
       </div>
 
-      {/* Scrollable curve lists - both rendered, one hidden */}
+      {/* Scrollable curve lists - all rendered, two hidden */}
+      <div class={`flex-1 overflow-hidden flex flex-col ${activeTab !== 'all' ? 'hidden' : ''}`}>
+        {renderCurveList(allCurves, allListRef)}
+        <div class="flex-none p-2 border-t border-base-300 text-xs opacity-70">
+          {allCurves.length} curves
+        </div>
+      </div>
+
       <div class={`flex-1 overflow-hidden flex flex-col ${activeTab !== 'pending' ? 'hidden' : ''}`}>
         {renderCurveList(pendingCurves, pendingListRef)}
         <div class="flex-none p-2 border-t border-base-300 text-xs opacity-70">

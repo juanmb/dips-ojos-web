@@ -142,3 +142,156 @@ func DeleteCurveClassifications(curveID int64, userID int64) (int64, error) {
 	}
 	return result.RowsAffected()
 }
+
+type DetailedUserStats struct {
+	TotalTransits       int    `json:"total_transits"`
+	ClassifiedTransits  int    `json:"classified_transits"`
+	TotalCurves         int    `json:"total_curves"`
+	CurvesWithProgress  int    `json:"curves_with_progress"`
+	CurvesCompleted     int    `json:"curves_completed"`
+	TransitoNormal      int    `json:"transito_normal"`
+	MorfologiaAnomala   int    `json:"morfologia_anomala"`
+	AsimetriaIzquierda  int    `json:"asimetria_izquierda"`
+	AsimetriaDerecha    int    `json:"asimetria_derecha"`
+	AumentoFlujo        int    `json:"aumento_flujo"`
+	DisminucionFlujo    int    `json:"disminucion_flujo"`
+	TDVMarcada          int    `json:"tdv_marcada"`
+	WithNotes           int    `json:"with_notes"`
+	LastActivity        string `json:"last_activity,omitempty"`
+}
+
+func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
+	var stats DetailedUserStats
+
+	// Get total transits and curves
+	err := db.DB.QueryRow(`
+		SELECT COUNT(*), SUM(num_expected_transits) FROM CurvasDeLuz WHERE num_expected_transits > 0
+	`).Scan(&stats.TotalCurves, &stats.TotalTransits)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get classification counts
+	err = db.DB.QueryRow(`
+		SELECT
+			COUNT(*),
+			SUM(CASE WHEN transito_normal THEN 1 ELSE 0 END),
+			SUM(CASE WHEN morfologia_anomala THEN 1 ELSE 0 END),
+			SUM(CASE WHEN asimetria_izquierda THEN 1 ELSE 0 END),
+			SUM(CASE WHEN asimetria_derecha THEN 1 ELSE 0 END),
+			SUM(CASE WHEN aumento_flujo_interior THEN 1 ELSE 0 END),
+			SUM(CASE WHEN disminucion_flujo_interior THEN 1 ELSE 0 END),
+			SUM(CASE WHEN tdv_marcada THEN 1 ELSE 0 END),
+			SUM(CASE WHEN notas != '' THEN 1 ELSE 0 END),
+			MAX(timestamp)
+		FROM ClasificacionesTransitos WHERE user_id = ?
+	`, userID).Scan(
+		&stats.ClassifiedTransits,
+		&stats.TransitoNormal,
+		&stats.MorfologiaAnomala,
+		&stats.AsimetriaIzquierda,
+		&stats.AsimetriaDerecha,
+		&stats.AumentoFlujo,
+		&stats.DisminucionFlujo,
+		&stats.TDVMarcada,
+		&stats.WithNotes,
+		&stats.LastActivity,
+	)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+
+	// Curves with at least one classification
+	err = db.DB.QueryRow(`
+		SELECT COUNT(DISTINCT curve_id) FROM ClasificacionesTransitos WHERE user_id = ?
+	`, userID).Scan(&stats.CurvesWithProgress)
+	if err != nil {
+		return nil, err
+	}
+
+	// Curves completed
+	err = db.DB.QueryRow(`
+		SELECT COUNT(*) FROM CurvasDeLuz c
+		WHERE c.num_expected_transits > 0
+		AND c.num_expected_transits <= (
+			SELECT COUNT(DISTINCT indice_transito)
+			FROM ClasificacionesTransitos
+			WHERE curve_id = c.id AND user_id = ?
+		)
+	`, userID).Scan(&stats.CurvesCompleted)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
+}
+
+type ClassificationExport struct {
+	CurveName                string  `json:"curve_name"`
+	TransitIndex             int     `json:"transit_index"`
+	TransitoNormal           bool    `json:"transito_normal"`
+	MorfologiaAnomala        bool    `json:"morfologia_anomala"`
+	AsimetriaIzquierda       bool    `json:"asimetria_izquierda"`
+	AsimetriaDerecha         bool    `json:"asimetria_derecha"`
+	AumentoFlujoInterior     bool    `json:"aumento_flujo_interior"`
+	DisminucionFlujoInterior bool    `json:"disminucion_flujo_interior"`
+	TDVMarcada               bool    `json:"tdv_marcada"`
+	TExpectedBJDS            *float64 `json:"t_expected_bjds"`
+	TObservedBJDS            *float64 `json:"t_observed_bjds"`
+	TTVMinutes               *float64 `json:"ttv_minutes"`
+	Notas                    string  `json:"notas"`
+	Timestamp                string  `json:"timestamp"`
+}
+
+func GetUserClassificationsForExport(userID int64) ([]ClassificationExport, error) {
+	rows, err := db.DB.Query(`
+		SELECT
+			c.nombre_archivo,
+			ct.indice_transito,
+			ct.transito_normal,
+			ct.morfologia_anomala,
+			ct.asimetria_izquierda,
+			ct.asimetria_derecha,
+			ct.aumento_flujo_interior,
+			ct.disminucion_flujo_interior,
+			ct.tdv_marcada,
+			ct.t_expected_bjds,
+			ct.t_observed_bjds,
+			ct.ttv_minutes,
+			COALESCE(ct.notas, ''),
+			COALESCE(ct.timestamp, '')
+		FROM ClasificacionesTransitos ct
+		JOIN CurvasDeLuz c ON ct.curve_id = c.id
+		WHERE ct.user_id = ?
+		ORDER BY c.nombre_archivo, ct.indice_transito
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var exports []ClassificationExport
+	for rows.Next() {
+		var e ClassificationExport
+		if err := rows.Scan(
+			&e.CurveName,
+			&e.TransitIndex,
+			&e.TransitoNormal,
+			&e.MorfologiaAnomala,
+			&e.AsimetriaIzquierda,
+			&e.AsimetriaDerecha,
+			&e.AumentoFlujoInterior,
+			&e.DisminucionFlujoInterior,
+			&e.TDVMarcada,
+			&e.TExpectedBJDS,
+			&e.TObservedBJDS,
+			&e.TTVMinutes,
+			&e.Notas,
+			&e.Timestamp,
+		); err != nil {
+			return nil, err
+		}
+		exports = append(exports, e)
+	}
+	return exports, rows.Err()
+}

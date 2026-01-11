@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS ClasificacionesTransitos;
+DROP TABLE IF EXISTS CurvasDeLuz;
+DROP TABLE IF EXISTS Usuarios;

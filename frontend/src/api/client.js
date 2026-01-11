@@ -82,5 +82,41 @@ export const api = {
 
   // Stats
   getStats: () =>
-    request('GET', '/stats')
+    request('GET', '/stats'),
+
+  // Admin - Users
+  getUsers: () =>
+    request('GET', '/admin/users'),
+
+  createUser: (data) =>
+    request('POST', '/admin/users', data),
+
+  updateUser: (id, data) =>
+    request('PUT', `/admin/users/${id}`, data),
+
+  deleteUser: (id) =>
+    request('DELETE', `/admin/users/${id}`),
+
+  getUserStats: (id) =>
+    request('GET', `/admin/users/${id}/stats`),
+
+  exportUserClassifications: (id) => {
+    // Direct download - returns the URL to fetch
+    const headers = { 'Authorization': `Bearer ${token.value}` }
+    return fetch(`${API_BASE}/admin/users/${id}/export`, { headers })
+      .then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `classifications_user_${id}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+      })
+  }
 }
