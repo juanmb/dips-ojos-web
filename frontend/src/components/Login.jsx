@@ -44,7 +44,8 @@ export function Login() {
               />
             </a>
           </div>
-          <h2 class="card-title justify-center text-2xl mb-4">Dips OjOs</h2>
+          <h2 class="card-title justify-center text-2xl">Dips OjOs</h2>
+          <p class="text-center text-sm opacity-70 mb-4">Inicia sesión para inspeccionar curvas de luz</p>
           <form onSubmit={handleSubmit}>
             {error && (
               <div class="alert alert-error mb-4">
