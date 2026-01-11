@@ -1,30 +1,37 @@
 services:
   app:
+    image: twave/dips-ojos-web:latest
     build: .
     ports:
-      - "8080:8080"
+      - "8087:8080"
+    networks:
+      - traefik
     volumes:
       - ./plots:/plots:ro
       - ./db:/db
+    env_file:
+      - .env
     environment:
       - DATABASE_PATH=/db/transit_analysis.db
       - CSV_PATH=/plots/transit_summary.csv
       - PLOTS_DIR=/plots
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
     restart: unless-stopped
 
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.emoons.rule=Host(`${HOSTNAME}`)"
-      - "traefik.http.routers.emoons.entrypoints=websecure"
-      - "traefik.http.routers.emoons.tls.certresolver=myresolver"
+      - "traefik.http.routers.emoons2.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.emoons2.entrypoints=websecure"
+      - "traefik.http.routers.emoons2.tls.certresolver=myresolver"
 
-      - "traefik.http.routers.emoons-http.rule=Host(`${HOSTNAME}`)"
-      - "traefik.http.routers.emoons-http.entrypoints=web"
-      - "traefik.http.routers.emoons-http.middlewares=emoons-https"
+      - "traefik.http.routers.emoons2-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.emoons2-http.entrypoints=web"
+      - "traefik.http.routers.emoons2-http.middlewares=emoons2-https"
 
-      - "traefik.http.middlewares.emoons-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.emoons2-https.redirectscheme.scheme=https"
 
 networks:
   traefik:
