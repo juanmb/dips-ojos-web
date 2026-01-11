@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'preact/hooks'
 import { api } from '../api/client.js'
+import { t } from '../i18n/index.js'
+import { CreateUserModal } from './modals/CreateUserModal.jsx'
+import { EditUserModal } from './modals/EditUserModal.jsx'
+import { DeleteConfirmModal } from './modals/DeleteConfirmModal.jsx'
 
 export function AdminPanel() {
   const [users, setUsers] = useState([])
@@ -8,6 +12,7 @@ export function AdminPanel() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const [sortColumn, setSortColumn] = useState('fullname')
   const [sortDirection, setSortDirection] = useState('asc')
 
@@ -29,11 +34,14 @@ export function AdminPanel() {
 
   const handleDelete = async (id) => {
     try {
+      setDeleting(true)
       await api.deleteUser(id)
       setDeleteConfirm(null)
       loadUsers()
     } catch (err) {
       setError(err.message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -97,9 +105,9 @@ export function AdminPanel() {
   return (
     <div class="p-4 h-full overflow-auto">
       <div class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">User Administration</h1>
+        <h1 class="text-2xl font-bold">{t('admin.title')}</h1>
         <button class="btn btn-primary btn-sm" onClick={() => setShowCreateForm(true)}>
-          + New User
+          {t('admin.newUser')}
         </button>
       </div>
 
@@ -123,27 +131,27 @@ export function AdminPanel() {
                   class="cursor-pointer hover:bg-base-300 select-none"
                   onClick={() => handleSort('fullname')}
                 >
-                  User<SortIcon column="fullname" />
+                  {t('admin.user')}<SortIcon column="fullname" />
                 </th>
                 <th
                   class="cursor-pointer hover:bg-base-300 select-none"
                   onClick={() => handleSort('progress')}
                 >
-                  Progress<SortIcon column="progress" />
+                  {t('admin.progress')}<SortIcon column="progress" />
                 </th>
                 <th
                   class="cursor-pointer hover:bg-base-300 select-none"
                   onClick={() => handleSort('last_activity')}
                 >
-                  Last Activity<SortIcon column="last_activity" />
+                  {t('admin.lastActivity')}<SortIcon column="last_activity" />
                 </th>
                 <th
                   class="cursor-pointer hover:bg-base-300 select-none"
                   onClick={() => handleSort('is_admin')}
                 >
-                  Admin<SortIcon column="is_admin" />
+                  {t('admin.isAdmin')}<SortIcon column="is_admin" />
                 </th>
-                <th>Actions</th>
+                <th>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -173,7 +181,7 @@ export function AdminPanel() {
                       </a>
                     </td>
                     <td class="text-sm opacity-70">
-                      {user.last_activity ? new Date(user.last_activity).toLocaleDateString() : 'Never'}
+                      {user.last_activity ? new Date(user.last_activity).toLocaleDateString() : t('common.never')}
                     </td>
                     <td>
                       {user.is_admin && <span class="badge badge-primary badge-sm">Admin</span>}
@@ -184,13 +192,13 @@ export function AdminPanel() {
                           class="btn btn-ghost btn-xs"
                           onClick={() => setEditingUser(user)}
                         >
-                          Edit
+                          {t('common.edit')}
                         </button>
                         <button
                           class="btn btn-ghost btn-xs text-error"
                           onClick={() => setDeleteConfirm(user)}
                         >
-                          Delete
+                          {t('common.delete')}
                         </button>
                       </div>
                     </td>
@@ -202,7 +210,6 @@ export function AdminPanel() {
         </div>
       )}
 
-      {/* Create User Modal */}
       {showCreateForm && (
         <CreateUserModal
           onClose={() => setShowCreateForm(false)}
@@ -213,7 +220,6 @@ export function AdminPanel() {
         />
       )}
 
-      {/* Edit User Modal */}
       {editingUser && (
         <EditUserModal
           user={editingUser}
@@ -225,159 +231,16 @@ export function AdminPanel() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div class="modal modal-open">
-          <div class="modal-box">
-            <h3 class="font-bold text-lg">Delete User</h3>
-            <p class="py-4">
-              Are you sure you want to delete <strong>{deleteConfirm.fullname}</strong>?
-              This will also delete all their classifications.
-            </p>
-            <div class="modal-action">
-              <button class="btn" onClick={() => setDeleteConfirm(null)}>Cancel</button>
-              <button class="btn btn-error" onClick={() => handleDelete(deleteConfirm.id)}>Delete</button>
-            </div>
-          </div>
-          <div class="modal-backdrop" onClick={() => setDeleteConfirm(null)}></div>
-        </div>
+        <DeleteConfirmModal
+          title={t('admin.deleteUser')}
+          message={<>{t('admin.deleteConfirm')} <strong>{deleteConfirm.fullname}</strong>?</>}
+          info={t('admin.deleteInfo')}
+          onClose={() => setDeleteConfirm(null)}
+          onConfirm={() => handleDelete(deleteConfirm.id)}
+          confirming={deleting}
+        />
       )}
-    </div>
-  )
-}
-
-function CreateUserModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ username: '', password: '', fullname: '', is_admin: false })
-  const [error, setError] = useState(null)
-  const [saving, setSaving] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      setSaving(true)
-      await api.createUser(form)
-      onCreated()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Create New User</h3>
-        {error && <div class="alert alert-error mb-4 text-sm">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div class="form-control mb-2">
-            <label class="label"><span class="label-text">Username</span></label>
-            <input
-              type="text"
-              class="input input-bordered"
-              value={form.username}
-              onInput={e => setForm({ ...form, username: e.target.value })}
-              required
-            />
-          </div>
-          <div class="form-control mb-2">
-            <label class="label"><span class="label-text">Password</span></label>
-            <input
-              type="password"
-              class="input input-bordered"
-              value={form.password}
-              onInput={e => setForm({ ...form, password: e.target.value })}
-              required
-            />
-          </div>
-          <div class="form-control mb-2">
-            <label class="label"><span class="label-text">Full Name</span></label>
-            <input
-              type="text"
-              class="input input-bordered"
-              value={form.fullname}
-              onInput={e => setForm({ ...form, fullname: e.target.value })}
-              required
-            />
-          </div>
-          <div class="form-control mb-4">
-            <label class="label cursor-pointer justify-start gap-2">
-              <input
-                type="checkbox"
-                class="checkbox"
-                checked={form.is_admin}
-                onChange={e => setForm({ ...form, is_admin: e.target.checked })}
-              />
-              <span class="label-text">Administrator</span>
-            </label>
-          </div>
-          <div class="modal-action">
-            <button type="button" class="btn" onClick={onClose}>Cancel</button>
-            <button type="submit" class="btn btn-primary" disabled={saving}>
-              {saving ? <span class="loading loading-spinner loading-sm"></span> : 'Create'}
-            </button>
-          </div>
-        </form>
-      </div>
-      <div class="modal-backdrop" onClick={onClose}></div>
-    </div>
-  )
-}
-
-function EditUserModal({ user, onClose, onUpdated }) {
-  const [form, setForm] = useState({ fullname: user.fullname, is_admin: user.is_admin })
-  const [error, setError] = useState(null)
-  const [saving, setSaving] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      setSaving(true)
-      await api.updateUser(user.id, form)
-      onUpdated()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Edit User: {user.username}</h3>
-        {error && <div class="alert alert-error mb-4 text-sm">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div class="form-control mb-2">
-            <label class="label"><span class="label-text">Full Name</span></label>
-            <input
-              type="text"
-              class="input input-bordered"
-              value={form.fullname}
-              onInput={e => setForm({ ...form, fullname: e.target.value })}
-              required
-            />
-          </div>
-          <div class="form-control mb-4">
-            <label class="label cursor-pointer justify-start gap-2">
-              <input
-                type="checkbox"
-                class="checkbox"
-                checked={form.is_admin}
-                onChange={e => setForm({ ...form, is_admin: e.target.checked })}
-              />
-              <span class="label-text">Administrator</span>
-            </label>
-          </div>
-          <div class="modal-action">
-            <button type="button" class="btn" onClick={onClose}>Cancel</button>
-            <button type="submit" class="btn btn-primary" disabled={saving}>
-              {saving ? <span class="loading loading-spinner loading-sm"></span> : 'Save'}
-            </button>
-          </div>
-        </form>
-      </div>
-      <div class="modal-backdrop" onClick={onClose}></div>
     </div>
   )
 }

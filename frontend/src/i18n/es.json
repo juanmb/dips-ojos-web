@@ -1,0 +1,129 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "create": "Crear",
+    "actions": "Acciones",
+    "never": "Nunca"
+  },
+  "login": {
+    "title": "Dips OjOs",
+    "subtitle": "Inicia sesión para inspeccionar curvas de luz",
+    "username": "Usuario",
+    "usernamePlaceholder": "Introduce usuario",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Introduce contraseña",
+    "submit": "Entrar",
+    "submitting": "Entrando...",
+    "failed": "Error de autenticación"
+  },
+  "navbar": {
+    "classifier": "Clasificador",
+    "admin": "Admin",
+    "logout": "Cerrar sesión",
+    "help": "Atajos de teclado (?)"
+  },
+  "help": {
+    "title": "Atajos de Teclado",
+    "transitNav": "Navegación de Tránsitos",
+    "prevTransit": "Tránsito anterior",
+    "nextTransit": "Tránsito siguiente",
+    "curveNav": "Navegación de Curvas",
+    "prevCurve": "Curva anterior",
+    "nextCurve": "Curva siguiente",
+    "general": "General",
+    "toggleHelp": "Mostrar/ocultar ayuda",
+    "closeDialog": "Cerrar diálogo"
+  },
+  "curves": {
+    "filter": "Filtrar curvas...",
+    "all": "Todas",
+    "pending": "Pendientes",
+    "done": "Completas",
+    "noCurves": "No se encontraron curvas",
+    "curvesCount": "{{count}} curvas",
+    "curve": "Curva {{id}}"
+  },
+  "transit": {
+    "selectCurve": "Selecciona una curva para ver tránsitos",
+    "shortcutsHint": "Pulsa ? para ver atajos de teclado",
+    "noTransits": "No hay tránsitos para esta curva",
+    "noImage": "Imagen no disponible",
+    "parameters": "Parámetros del Tránsito",
+    "radius": "Radio (Rp/R*)",
+    "semiAxis": "Semieje (a/R*)",
+    "theo": "Teórico:",
+    "fitted": "Ajustado:",
+    "t0Expected": "T0 Esperado",
+    "t0Fitted": "T0 Ajustado",
+    "ttvMin": "TTV (min)",
+    "rms": "RMS",
+    "period": "Período (d)",
+    "inc": "Inc (deg)",
+    "prevTitle": "Tránsito anterior (\u2190 o A)",
+    "nextTitle": "Tránsito siguiente (\u2192 o D)"
+  },
+  "classification": {
+    "title": "Clasificación",
+    "classified": "Clasificado",
+    "pending": "Pendiente",
+    "notes": "Notas",
+    "notesPlaceholder": "Observaciones adicionales...",
+    "normalMorphology": "Morfología Normal",
+    "anomalousMorphology": "Morfología Anómala",
+    "leftAsymmetry": "Asimetría Izquierda",
+    "rightAsymmetry": "Asimetría Derecha",
+    "interiorFluxIncrease": "Aumento Flujo Interior",
+    "interiorFluxDecrease": "Disminución Flujo Interior",
+    "markedTdv": "TDV Marcada",
+    "deleteAll": "Eliminar Clasificaciones",
+    "deleteAllTitle": "Eliminar Todas las Clasificaciones",
+    "deleteWarning": "¡Esta acción no se puede deshacer!",
+    "deleteConfirm": "¿Estás seguro de eliminar todas tus clasificaciones de",
+    "deleteInfo": "Se eliminarán todas las clasificaciones de tránsitos que hayas hecho para esta curva.",
+    "deleting": "Eliminando..."
+  },
+  "stats": {
+    "classifiedTransits": "Tránsitos clasificados",
+    "curvesDone": "Curvas completas"
+  },
+  "admin": {
+    "title": "Administración de Usuarios",
+    "newUser": "+ Nuevo Usuario",
+    "user": "Usuario",
+    "progress": "Progreso",
+    "lastActivity": "Última Actividad",
+    "isAdmin": "Admin",
+    "createUser": "Crear Nuevo Usuario",
+    "editUser": "Editar Usuario: {{username}}",
+    "deleteUser": "Eliminar Usuario",
+    "deleteConfirm": "¿Estás seguro de eliminar a",
+    "deleteInfo": "También se eliminarán todas sus clasificaciones.",
+    "fullName": "Nombre Completo",
+    "administrator": "Administrador",
+    "userNotFound": "Usuario no encontrado",
+    "backToAdmin": "Volver a Admin"
+  },
+  "userDetail": {
+    "exportCsv": "Exportar CSV",
+    "transitsClassified": "Tránsitos Clasificados",
+    "curvesCompleted": "Curvas Completadas",
+    "complete": "{{percent}}% completado",
+    "curvesWithProgress": "{{count}} curvas con progreso",
+    "classificationBreakdown": "Desglose de Clasificaciones",
+    "category": "Categoría",
+    "count": "Cantidad",
+    "hasNotes": "Con Notas",
+    "lastActivity": "Última actividad: {{date}}",
+    "noStats": "No hay estadísticas disponibles"
+  },
+  "language": {
+    "en": "English",
+    "es": "Español"
+  }
+}

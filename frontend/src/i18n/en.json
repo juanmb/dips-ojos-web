@@ -1,0 +1,129 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "create": "Create",
+    "actions": "Actions",
+    "never": "Never"
+  },
+  "login": {
+    "title": "Dips OjOs",
+    "subtitle": "Sign in to inspect light curves",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Login",
+    "submitting": "Logging in...",
+    "failed": "Login failed"
+  },
+  "navbar": {
+    "classifier": "Classifier",
+    "admin": "Admin",
+    "logout": "Logout",
+    "help": "Keyboard shortcuts (?)"
+  },
+  "help": {
+    "title": "Keyboard Shortcuts",
+    "transitNav": "Transit Navigation",
+    "prevTransit": "Previous transit",
+    "nextTransit": "Next transit",
+    "curveNav": "Curve Navigation",
+    "prevCurve": "Previous curve",
+    "nextCurve": "Next curve",
+    "general": "General",
+    "toggleHelp": "Toggle help",
+    "closeDialog": "Close dialog"
+  },
+  "curves": {
+    "filter": "Filter curves...",
+    "all": "All",
+    "pending": "Pending",
+    "done": "Done",
+    "noCurves": "No curves found",
+    "curvesCount": "{{count}} curves",
+    "curve": "Curve {{id}}"
+  },
+  "transit": {
+    "selectCurve": "Select a curve to view transits",
+    "shortcutsHint": "Press ? for keyboard shortcuts",
+    "noTransits": "No transits found for this curve",
+    "noImage": "No image available",
+    "parameters": "Transit Parameters",
+    "radius": "Radius (Rp/R*)",
+    "semiAxis": "Semi-axis (a/R*)",
+    "theo": "Theo:",
+    "fitted": "Fitted:",
+    "t0Expected": "T0 Expected",
+    "t0Fitted": "T0 Fitted",
+    "ttvMin": "TTV (min)",
+    "rms": "RMS",
+    "period": "Period (d)",
+    "inc": "Inc (deg)",
+    "prevTitle": "Previous transit (\u2190 or A)",
+    "nextTitle": "Next transit (\u2192 or D)"
+  },
+  "classification": {
+    "title": "Classification",
+    "classified": "Classified",
+    "pending": "Pending",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional observations...",
+    "normalMorphology": "Normal Morphology",
+    "anomalousMorphology": "Anomalous Morphology",
+    "leftAsymmetry": "Left Asymmetry",
+    "rightAsymmetry": "Right Asymmetry",
+    "interiorFluxIncrease": "Interior Flux Increase",
+    "interiorFluxDecrease": "Interior Flux Decrease",
+    "markedTdv": "Marked TDV",
+    "deleteAll": "Delete All Classifications",
+    "deleteAllTitle": "Delete All Classifications",
+    "deleteWarning": "This action cannot be undone!",
+    "deleteConfirm": "Are you sure you want to delete all your classifications for",
+    "deleteInfo": "This will remove all transit classifications you have made for this curve.",
+    "deleting": "Deleting..."
+  },
+  "stats": {
+    "classifiedTransits": "Classified transits",
+    "curvesDone": "Curves done"
+  },
+  "admin": {
+    "title": "User Administration",
+    "newUser": "+ New User",
+    "user": "User",
+    "progress": "Progress",
+    "lastActivity": "Last Activity",
+    "isAdmin": "Admin",
+    "createUser": "Create New User",
+    "editUser": "Edit User: {{username}}",
+    "deleteUser": "Delete User",
+    "deleteConfirm": "Are you sure you want to delete",
+    "deleteInfo": "This will also delete all their classifications.",
+    "fullName": "Full Name",
+    "administrator": "Administrator",
+    "userNotFound": "User not found",
+    "backToAdmin": "Back to Admin"
+  },
+  "userDetail": {
+    "exportCsv": "Export CSV",
+    "transitsClassified": "Transits Classified",
+    "curvesCompleted": "Curves Completed",
+    "complete": "{{percent}}% complete",
+    "curvesWithProgress": "{{count}} curves with progress",
+    "classificationBreakdown": "Classification Breakdown",
+    "category": "Category",
+    "count": "Count",
+    "hasNotes": "Has Notes",
+    "lastActivity": "Last activity: {{date}}",
+    "noStats": "No statistics available"
+  },
+  "language": {
+    "en": "English",
+    "es": "Español"
+  }
+}

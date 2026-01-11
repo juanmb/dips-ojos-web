@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import { api } from "../api/client.js";
 import { setAuth } from "../stores/auth.js";
+import { t, language, setLanguage } from "../i18n/index.js";
 
 export function Login() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,7 @@ export function Login() {
       const data = await api.login(username, password);
       setAuth(data.token, data.user);
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message || t('login.failed'));
     } finally {
       setLoading(false);
     }
@@ -44,8 +45,27 @@ export function Login() {
               />
             </a>
           </div>
-          <h2 class="card-title justify-center text-2xl">Dips OjOs</h2>
-          <p class="text-center text-sm opacity-70 mb-4">Inicia sesión para inspeccionar curvas de luz</p>
+          <h2 class="card-title justify-center text-2xl">{t('login.title')}</h2>
+          <p class="text-center text-sm opacity-70 mb-4">{t('login.subtitle')}</p>
+
+          {/* Language selector */}
+          <div class="flex justify-center gap-2 mb-4">
+            <button
+              type="button"
+              class={`btn btn-xs ${language.value === 'en' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setLanguage('en')}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              class={`btn btn-xs ${language.value === 'es' ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setLanguage('es')}
+            >
+              ES
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit}>
             {error && (
               <div class="alert alert-error mb-4">
@@ -55,11 +75,11 @@ export function Login() {
 
             <div class="form-control mb-4">
               <label class="label">
-                <span class="label-text">Username</span>
+                <span class="label-text">{t('login.username')}</span>
               </label>
               <input
                 type="text"
-                placeholder="Enter username"
+                placeholder={t('login.usernamePlaceholder')}
                 class="input input-bordered"
                 value={username}
                 onInput={(e) => setUsername(e.target.value)}
@@ -69,11 +89,11 @@ export function Login() {
 
             <div class="form-control mb-6">
               <label class="label">
-                <span class="label-text">Password</span>
+                <span class="label-text">{t('login.password')}</span>
               </label>
               <input
                 type="password"
-                placeholder="Enter password"
+                placeholder={t('login.passwordPlaceholder')}
                 class="input input-bordered"
                 value={password}
                 onInput={(e) => setPassword(e.target.value)}
@@ -87,7 +107,7 @@ export function Login() {
                 class={`btn btn-primary ${loading ? "loading" : ""}`}
                 disabled={loading}
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? t('login.submitting') : t('login.submit')}
               </button>
             </div>
           </form>

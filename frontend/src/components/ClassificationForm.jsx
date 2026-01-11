@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks'
 import { api } from '../api/client.js'
+import { t } from '../i18n/index.js'
 
 export function ClassificationForm({ file, transitIndex, onSaved }) {
   const [loading, setLoading] = useState(false)
@@ -116,13 +117,13 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
   }
 
   const checkboxes = [
-    { field: 'transito_normal', label: 'Normal Morphology' },
-    { field: 'morfologia_anomala', label: 'Anomalous Morphology' },
-    { field: 'asimetria_izquierda', label: 'Left Asymmetry' },
-    { field: 'asimetria_derecha', label: 'Right Asymmetry' },
-    { field: 'aumento_flujo_interior', label: 'Interior Flux Increase' },
-    { field: 'disminucion_flujo_interior', label: 'Interior Flux Decrease' },
-    { field: 'tdv_marcada', label: 'Marked TDV' }
+    { field: 'transito_normal', labelKey: 'classification.normalMorphology' },
+    { field: 'morfologia_anomala', labelKey: 'classification.anomalousMorphology' },
+    { field: 'asimetria_izquierda', labelKey: 'classification.leftAsymmetry' },
+    { field: 'asimetria_derecha', labelKey: 'classification.rightAsymmetry' },
+    { field: 'aumento_flujo_interior', labelKey: 'classification.interiorFluxIncrease' },
+    { field: 'disminucion_flujo_interior', labelKey: 'classification.interiorFluxDecrease' },
+    { field: 'tdv_marcada', labelKey: 'classification.markedTdv' }
   ]
 
   const isClassified = checkboxes.some(({ field }) => classification[field])
@@ -132,16 +133,16 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
       <div class="card-body p-4">
         <h3 class="card-title text-sm flex items-center justify-between">
           <span class="flex items-center gap-2">
-            Classification
+            {t('classification.title')}
             {saving && <span class="loading loading-spinner loading-xs"></span>}
           </span>
           <span class={`badge badge-sm ${isClassified ? 'badge-success' : 'badge-warning'}`}>
-            {isClassified ? 'Classified' : 'Pending'}
+            {isClassified ? t('classification.classified') : t('classification.pending')}
           </span>
         </h3>
 
         <div class="grid grid-cols-1 gap-2">
-          {checkboxes.map(({ field, label }) => (
+          {checkboxes.map(({ field, labelKey }) => (
             <label key={field} class="label cursor-pointer justify-start gap-3 py-1">
               <input
                 type="checkbox"
@@ -149,18 +150,18 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
                 checked={classification[field]}
                 onChange={() => handleCheckboxChange(field)}
               />
-              <span class="label-text">{label}</span>
+              <span class="label-text">{t(labelKey)}</span>
             </label>
           ))}
         </div>
 
         <div class="form-control mt-2">
           <label class="label py-1">
-            <span class="label-text">Notes</span>
+            <span class="label-text">{t('classification.notes')}</span>
           </label>
           <textarea
             class="textarea textarea-bordered textarea-sm h-20"
-            placeholder="Additional observations..."
+            placeholder={t('classification.notesPlaceholder')}
             value={classification.notas}
             onInput={handleNotesChange}
           ></textarea>

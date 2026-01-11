@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from 'preact/hooks'
 import Router, { route } from 'preact-router'
 import { isAuthenticated, isAdmin, logout } from './stores/auth.js'
 import { api } from './api/client.js'
+import { t } from './i18n/index.js'
 import { Login } from './components/Login.jsx'
 import { CurveList } from './components/CurveList.jsx'
 import { TransitViewer } from './components/TransitViewer.jsx'
 import { StatsPanel } from './components/StatsPanel.jsx'
 import { AdminPanel } from './components/AdminPanel.jsx'
 import { UserDetail } from './components/UserDetail.jsx'
+import { Navbar } from './components/layout/Navbar.jsx'
+import { HelpDialog } from './components/layout/HelpDialog.jsx'
 
 function MainView({ curves, selectedCurve, setSelectedCurve, refreshKey, onClassificationSaved, navigateCurve }) {
   return (
@@ -83,9 +86,9 @@ function UserDetailView({ id }) {
   if (!user) {
     return (
       <div class="flex-1 min-h-0 overflow-hidden p-4">
-        <div class="alert alert-error">User not found</div>
+        <div class="alert alert-error">{t('admin.userNotFound')}</div>
         <button class="btn btn-ghost mt-4" onClick={() => route('/admin')}>
-          Back to Admin
+          {t('admin.backToAdmin')}
         </button>
       </div>
     )
@@ -177,124 +180,16 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [showHelp])
 
-  const HelpDialog = () => (
-    <dialog class={`modal ${showHelp ? 'modal-open' : ''}`}>
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Keyboard Shortcuts</h3>
-
-        <div class="space-y-4">
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">Transit Navigation</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">←</kbd> or <kbd class="kbd kbd-sm">A</kbd></div>
-              <div>Previous transit</div>
-              <div><kbd class="kbd kbd-sm">→</kbd> or <kbd class="kbd kbd-sm">D</kbd></div>
-              <div>Next transit</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">Curve Navigation</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">↑</kbd> or <kbd class="kbd kbd-sm">W</kbd></div>
-              <div>Previous curve</div>
-              <div><kbd class="kbd kbd-sm">↓</kbd> or <kbd class="kbd kbd-sm">S</kbd></div>
-              <div>Next curve</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">General</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">?</kbd> or <kbd class="kbd kbd-sm">H</kbd></div>
-              <div>Toggle help</div>
-              <div><kbd class="kbd kbd-sm">Esc</kbd></div>
-              <div>Close dialog</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-action">
-          <button class="btn btn-sm" onClick={() => setShowHelp(false)}>Close</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button onClick={() => setShowHelp(false)}>close</button>
-      </form>
-    </dialog>
-  )
-
   const isAdminRoute = currentPath.startsWith('/admin')
 
   return (
     <div class="h-screen flex flex-col">
-      {/* Fixed top navbar */}
-      <div class="navbar bg-base-100 border-b border-base-300 flex-none">
-        {/* Mobile menu toggle - only show on main view */}
-        <div class="flex-none lg:hidden">
-          {!isAdminRoute && (
-            <label for="sidebar-drawer" class="btn btn-square btn-ghost">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </label>
-          )}
-        </div>
+      <Navbar
+        isAdminRoute={isAdminRoute}
+        onLogout={handleLogout}
+        onShowHelp={() => setShowHelp(true)}
+      />
 
-        {/* Title - clickable to go home */}
-        <div class="flex-1 pl-4">
-          <a href="/" class="text-xl font-bold hover:opacity-80 transition-opacity">Dips OjOs</a>
-        </div>
-
-        {/* Right side: admin, help, logout */}
-        <div class="flex-none flex items-center gap-1">
-          {isAdmin.value && (
-            <a
-              href={isAdminRoute ? '/' : '/admin'}
-              class={`btn btn-sm btn-ghost ${isAdminRoute ? 'btn-active' : ''}`}
-              title={isAdminRoute ? 'Back to Classifier' : 'Admin Panel'}
-            >
-              {isAdminRoute ? (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                  </svg>
-                  <span class="hidden sm:inline ml-1">Classifier</span>
-                </>
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  <span class="hidden sm:inline ml-1">Admin</span>
-                </>
-              )}
-            </a>
-          )}
-
-          <button
-            class="btn btn-sm btn-ghost btn-circle"
-            onClick={() => setShowHelp(true)}
-            title="Keyboard shortcuts (?)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </button>
-
-          <button
-            class="btn btn-sm btn-ghost btn-circle"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Router content */}
       <Router onChange={handleRouteChange}>
         <MainView
           path="/"
@@ -309,7 +204,7 @@ export function App() {
         <UserDetailView path="/admin/users/:id" />
       </Router>
 
-      <HelpDialog />
+      <HelpDialog show={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'preact/hooks'
+import { t } from '../i18n/index.js'
 
 export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
   const [filter, setFilter] = useState('')
@@ -8,7 +9,7 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
   const pendingListRef = useRef(null)
   const completedListRef = useRef(null)
 
-  const getCurveName = (curve) => `Curve ${curve.id}`
+  const getCurveName = (curve) => t('curves.curve', { id: curve.id })
 
   const isCompleted = (curve) => {
     const total = curve.num_expected_transits || 0
@@ -63,7 +64,7 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
         })}
         {curveList.length === 0 && (
           <li class="text-center text-sm opacity-50 py-4">
-            No curves found
+            {t('curves.noCurves')}
           </li>
         )}
       </ul>
@@ -76,7 +77,7 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
       <div class="flex-none p-2 border-b border-base-300">
         <input
           type="text"
-          placeholder="Filter curves..."
+          placeholder={t('curves.filter')}
           class="input input-bordered input-sm w-full"
           value={filter}
           onInput={(e) => setFilter(e.target.value)}
@@ -87,22 +88,25 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
       <div class="flex-none border-b border-base-300">
         <div class="tabs tabs-boxed bg-transparent p-1">
           <a
-            class={`tab tab-sm flex-1 ${activeTab === 'all' ? 'tab-active' : ''}`}
+            class={`tab tab-sm flex-1 flex-col h-auto py-1 ${activeTab === 'all' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('all')}
           >
-            All ({allCount})
+            <span>{t('curves.all')}</span>
+            <span class="text-xs opacity-70">({allCount})</span>
           </a>
           <a
-            class={`tab tab-sm flex-1 ${activeTab === 'pending' ? 'tab-active' : ''}`}
+            class={`tab tab-sm flex-1 flex-col h-auto py-1 ${activeTab === 'pending' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('pending')}
           >
-            Pending ({pendingCount})
+            <span>{t('curves.pending')}</span>
+            <span class="text-xs opacity-70">({pendingCount})</span>
           </a>
           <a
-            class={`tab tab-sm flex-1 ${activeTab === 'completed' ? 'tab-active' : ''}`}
+            class={`tab tab-sm flex-1 flex-col h-auto py-1 ${activeTab === 'completed' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('completed')}
           >
-            Done ({completedCount})
+            <span>{t('curves.done')}</span>
+            <span class="text-xs opacity-70">({completedCount})</span>
           </a>
         </div>
       </div>
@@ -111,21 +115,21 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
       <div class={`flex-1 overflow-hidden flex flex-col ${activeTab !== 'all' ? 'hidden' : ''}`}>
         {renderCurveList(allCurves, allListRef)}
         <div class="flex-none p-2 border-t border-base-300 text-xs opacity-70">
-          {allCurves.length} curves
+          {t('curves.curvesCount', { count: allCurves.length })}
         </div>
       </div>
 
       <div class={`flex-1 overflow-hidden flex flex-col ${activeTab !== 'pending' ? 'hidden' : ''}`}>
         {renderCurveList(pendingCurves, pendingListRef)}
         <div class="flex-none p-2 border-t border-base-300 text-xs opacity-70">
-          {pendingCurves.length} curves
+          {t('curves.curvesCount', { count: pendingCurves.length })}
         </div>
       </div>
 
       <div class={`flex-1 overflow-hidden flex flex-col ${activeTab !== 'completed' ? 'hidden' : ''}`}>
         {renderCurveList(completedCurves, completedListRef)}
         <div class="flex-none p-2 border-t border-base-300 text-xs opacity-70">
-          {completedCurves.length} curves
+          {t('curves.curvesCount', { count: completedCurves.length })}
         </div>
       </div>
     </div>
