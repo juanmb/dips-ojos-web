@@ -23,14 +23,16 @@ Web application for exoplanet transit light curve classification. Allows users t
 First, generate the transit plots from your light curve CSV files:
 
 ```bash
+cd plotter
+
 # Install Python dependencies
 uv sync
 
 # Generate all plots
-uv run python generate_plots.py -i /path/to/csv/files -o plots
+uv run python generate_plots.py -i /path/to/csv/files -o ../plots
 
 # Or with verbose output
-uv run python generate_plots.py -i /path/to/csv/files -o plots -v
+uv run python generate_plots.py -i /path/to/csv/files -o ../plots -v
 ```
 
 ### 2. Deploy with Docker Compose
@@ -73,11 +75,13 @@ pnpm run dev
 ### Plot Generator
 
 ```bash
+cd plotter
+
 # Install dependencies
 uv sync
 
 # Generate all plots
-uv run python generate_plots.py -i data -o plots
+uv run python generate_plots.py -i ../data -o ../plots
 
 # Generate specific file with verbose output
 uv run python generate_plots.py -f Corot1b.csv -v
