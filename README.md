@@ -50,6 +50,54 @@ make dev-frontend   Run frontend in development mode
 make clean          Remove generated files
 ```
 
+## Docker Deployment
+
+### Configuration
+
+Copy the example environment file and configure it:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your settings:
+
+```bash
+# Required: Admin credentials (created on first startup)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-secure-password
+
+# Required: JWT secret (use a random string in production)
+JWT_SECRET=your-secret-key
+
+# Required for Traefik: Hostname for SSL certificates
+HOSTNAME=your-domain.com
+```
+
+### Build and Run
+
+```bash
+# Build the Docker image
+make docker-build
+
+# Start the application
+make docker-up
+
+# View logs
+make docker-logs
+
+# Stop the application
+make docker-down
+```
+
+The application will be available at `http://localhost:8087` (or via Traefik at your configured hostname).
+
+### Volumes
+
+The compose file mounts:
+- `./plots:/plots:ro` - Transit plot images (read-only)
+- `./db:/db` - SQLite database (persistent)
+
 ## Development
 
 Run backend and frontend in separate terminals:
@@ -64,12 +112,14 @@ make dev-frontend
 
 ### Environment Variables
 
+- `ADMIN_USERNAME`: Admin user name (default: `admin`)
+- `ADMIN_PASSWORD`: Admin user password (default: `admin`)
+- `JWT_SECRET`: Secret key for JWT tokens
+- `PORT`: Server port (default: `8080`)
 - `DATABASE_PATH`: SQLite database path (default: `../db/transit_analysis.db`)
 - `CSV_PATH`: Transit summary CSV (default: `../plots/transit_summary.csv`)
 - `PLOTS_DIR`: Plot images directory (default: `../plots`)
 - `FRONTEND_DIR`: Built frontend assets (empty = dev mode with Vite proxy)
-- `JWT_SECRET`: Secret key for JWT tokens
-- `PORT`: Server port (default: `8080`)
 
 ## Data Format
 
