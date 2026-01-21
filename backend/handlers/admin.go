@@ -134,32 +134,32 @@ func ExportUserClassifications(c *gin.Context) {
 	// Write header
 	header := []string{
 		"curve", "transit_index",
-		"transito_normal", "morfologia_anomala",
-		"asimetria_izquierda", "asimetria_derecha",
-		"aumento_flujo_interior", "disminucion_flujo_interior",
-		"tdv_marcada",
-		"t_expected_bjds", "t_observed_bjds", "ttv_minutes",
-		"notas", "timestamp",
+		"normal_transit", "anomalous_morphology",
+		"left_asymmetry", "right_asymmetry",
+		"increased_flux", "decreased_flux",
+		"marked_tdv",
+		"t_expected_bjd", "t_observed_bjd", "ttv_minutes",
+		"notes", "timestamp",
 	}
 	writer.Write(header)
 
 	// Write data
-	for _, c := range classifications {
+	for _, cl := range classifications {
 		row := []string{
-			c.CurveName,
-			strconv.Itoa(c.TransitIndex),
-			boolToStr(c.TransitoNormal),
-			boolToStr(c.MorfologiaAnomala),
-			boolToStr(c.AsimetriaIzquierda),
-			boolToStr(c.AsimetriaDerecha),
-			boolToStr(c.AumentoFlujoInterior),
-			boolToStr(c.DisminucionFlujoInterior),
-			boolToStr(c.TDVMarcada),
-			floatPtrToStr(c.TExpectedBJDS),
-			floatPtrToStr(c.TObservedBJDS),
-			floatPtrToStr(c.TTVMinutes),
-			c.Notas,
-			c.Timestamp,
+			cl.CurveName,
+			strconv.Itoa(cl.TransitIndex),
+			boolToStr(cl.NormalTransit),
+			boolToStr(cl.AnomalousMorphology),
+			boolToStr(cl.LeftAsymmetry),
+			boolToStr(cl.RightAsymmetry),
+			boolToStr(cl.IncreasedFlux),
+			boolToStr(cl.DecreasedFlux),
+			boolToStr(cl.MarkedTDV),
+			floatPtrToStr(cl.TExpectedBJD),
+			floatPtrToStr(cl.TObservedBJD),
+			floatPtrToStr(cl.TTVMinutes),
+			cl.Notes,
+			cl.Timestamp,
 		}
 		writer.Write(row)
 	}

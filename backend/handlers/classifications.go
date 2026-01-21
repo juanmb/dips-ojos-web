@@ -79,8 +79,8 @@ func SaveClassification(c *gin.Context) {
 	// Get transit data from CSV to fill in timing info
 	transit := models.GetTransit(filename, index)
 	if transit != nil {
-		input.TExpectedBJDS = &transit.T0Expected
-		input.TObservedBJDS = transit.T0Fitted
+		input.TExpectedBJD = &transit.T0Expected
+		input.TObservedBJD = transit.T0Fitted
 		input.TTVMinutes = transit.TTVMinutes
 	}
 

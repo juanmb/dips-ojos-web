@@ -14,7 +14,7 @@ export function TransitParameters({ curve, transit }) {
           <div class="grid grid-cols-2 gap-1 text-xs">
             <div>
               <span class="opacity-60">{t('transit.theo')}</span>
-              <span class="font-mono ml-1">{curve?.radio_planeta_r_star?.toFixed(6) || '-'}</span>
+              <span class="font-mono ml-1">{curve?.planet_radius?.toFixed(6) || '-'}</span>
             </div>
             <div>
               <span class="opacity-60">{t('transit.fitted')}</span>
@@ -29,7 +29,7 @@ export function TransitParameters({ curve, transit }) {
           <div class="grid grid-cols-2 gap-1 text-xs">
             <div>
               <span class="opacity-60">{t('transit.theo')}</span>
-              <span class="font-mono ml-1">{curve?.semieje_a_r_star?.toFixed(4) || '-'}</span>
+              <span class="font-mono ml-1">{curve?.semi_major_axis?.toFixed(4) || '-'}</span>
             </div>
             <div>
               <span class="opacity-60">{t('transit.fitted')}</span>

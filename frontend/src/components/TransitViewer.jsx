@@ -174,7 +174,7 @@ export function TransitViewer({ curve, onClassificationSaved, onNextCurve, onPre
           <div class="p-2 flex-1 flex flex-col">
             <ClassificationForm
               key={classificationKey}
-              file={curve.nombre_archivo}
+              file={curve.filename}
               transitIndex={currentTransit?.transit_index ?? currentIndex}
               onSaved={onClassificationSaved}
             />

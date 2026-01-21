@@ -47,20 +47,20 @@ func LoadTransitsFromCSV(csvPath string) error {
 	}
 
 	// Clear existing transits
-	_, err = db.DB.Exec("DELETE FROM Transitos")
+	_, err = db.DB.Exec("DELETE FROM Transits")
 	if err != nil {
 		return fmt.Errorf("failed to clear transits table: %w", err)
 	}
 
 	// Reset found_transits counts
-	_, err = db.DB.Exec("UPDATE CurvasDeLuz SET found_transits = 0")
+	_, err = db.DB.Exec("UPDATE Curves SET found_transits = 0")
 	if err != nil {
 		return fmt.Errorf("failed to reset found_transits: %w", err)
 	}
 
 	// Build map of filename -> curve_id
 	curveMap := make(map[string]int64)
-	rows, err := db.DB.Query("SELECT id, nombre_archivo FROM CurvasDeLuz")
+	rows, err := db.DB.Query("SELECT id, filename FROM Curves")
 	if err != nil {
 		return fmt.Errorf("failed to query curves: %w", err)
 	}
@@ -135,7 +135,7 @@ func LoadTransitsFromCSV(csvPath string) error {
 		plotFile := record[13]
 
 		_, err = db.DB.Exec(`
-			INSERT INTO Transitos (curve_id, transit_index, t0_expected, t0_fitted, ttv_minutes,
+			INSERT INTO Transits (curve_id, transit_index, t0_expected, t0_fitted, ttv_minutes,
 				rp_fitted, a_fitted, rms_residuals, period, duration, inc, u1, u2, plot_file)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`, curveID, transitIndex, t0Expected, t0Fitted, ttvMinutes,
@@ -151,7 +151,7 @@ func LoadTransitsFromCSV(csvPath string) error {
 
 	// Update found_transits for each curve
 	for curveID, count := range transitCounts {
-		_, err = db.DB.Exec("UPDATE CurvasDeLuz SET found_transits = ? WHERE id = ?", count, curveID)
+		_, err = db.DB.Exec("UPDATE Curves SET found_transits = ? WHERE id = ?", count, curveID)
 		if err != nil {
 			log.Printf("Warning: failed to update found_transits for curve %d: %v", curveID, err)
 		}
@@ -165,9 +165,9 @@ func GetTransitsForFile(filename string) []Transit {
 	rows, err := db.DB.Query(`
 		SELECT t.id, t.curve_id, t.transit_index, t.t0_expected, t.t0_fitted, t.ttv_minutes,
 			t.rp_fitted, t.a_fitted, t.rms_residuals, t.period, t.duration, t.inc, t.u1, t.u2, t.plot_file
-		FROM Transitos t
-		JOIN CurvasDeLuz c ON t.curve_id = c.id
-		WHERE c.nombre_archivo = ?
+		FROM Transits t
+		JOIN Curves c ON t.curve_id = c.id
+		WHERE c.filename = ?
 		ORDER BY t.transit_index
 	`, filename)
 	if err != nil {
@@ -191,10 +191,10 @@ func GetTransitsForFile(filename string) []Transit {
 
 func GetTransitsByCurveID(curveID int64) []Transit {
 	rows, err := db.DB.Query(`
-		SELECT t.id, t.curve_id, c.nombre_archivo, t.transit_index, t.t0_expected, t.t0_fitted, t.ttv_minutes,
+		SELECT t.id, t.curve_id, c.filename, t.transit_index, t.t0_expected, t.t0_fitted, t.ttv_minutes,
 			t.rp_fitted, t.a_fitted, t.rms_residuals, t.period, t.duration, t.inc, t.u1, t.u2, t.plot_file
-		FROM Transitos t
-		JOIN CurvasDeLuz c ON t.curve_id = c.id
+		FROM Transits t
+		JOIN Curves c ON t.curve_id = c.id
 		WHERE t.curve_id = ?
 		ORDER BY t.transit_index
 	`, curveID)
@@ -222,9 +222,9 @@ func GetTransit(filename string, index int) *Transit {
 	err := db.DB.QueryRow(`
 		SELECT t.id, t.curve_id, t.transit_index, t.t0_expected, t.t0_fitted, t.ttv_minutes,
 			t.rp_fitted, t.a_fitted, t.rms_residuals, t.period, t.duration, t.inc, t.u1, t.u2, t.plot_file
-		FROM Transitos t
-		JOIN CurvasDeLuz c ON t.curve_id = c.id
-		WHERE c.nombre_archivo = ? AND t.transit_index = ?
+		FROM Transits t
+		JOIN Curves c ON t.curve_id = c.id
+		WHERE c.filename = ? AND t.transit_index = ?
 	`, filename, index).Scan(&t.ID, &t.CurveID, &t.TransitIndex, &t.T0Expected, &t.T0Fitted, &t.TTVMinutes,
 		&t.RpFitted, &t.AFitted, &t.RMSResiduals, &t.Period, &t.Duration, &t.Inc, &t.U1, &t.U2, &t.PlotFile)
 	if err != nil {
@@ -235,9 +235,9 @@ func GetTransit(filename string, index int) *Transit {
 
 func GetAllFiles() []string {
 	rows, err := db.DB.Query(`
-		SELECT DISTINCT c.nombre_archivo
-		FROM CurvasDeLuz c
-		JOIN Transitos t ON t.curve_id = c.id
+		SELECT DISTINCT c.filename
+		FROM Curves c
+		JOIN Transits t ON t.curve_id = c.id
 	`)
 	if err != nil {
 		return nil
@@ -257,9 +257,9 @@ func GetAllFiles() []string {
 func GetTransitCount(filename string) int {
 	var count int
 	err := db.DB.QueryRow(`
-		SELECT COUNT(*) FROM Transitos t
-		JOIN CurvasDeLuz c ON t.curve_id = c.id
-		WHERE c.nombre_archivo = ?
+		SELECT COUNT(*) FROM Transits t
+		JOIN Curves c ON t.curve_id = c.id
+		WHERE c.filename = ?
 	`, filename).Scan(&count)
 	if err != nil {
 		return 0
@@ -269,7 +269,7 @@ func GetTransitCount(filename string) int {
 
 func GetTotalTransitCount() int {
 	var count int
-	err := db.DB.QueryRow("SELECT COUNT(*) FROM Transitos").Scan(&count)
+	err := db.DB.QueryRow("SELECT COUNT(*) FROM Transits").Scan(&count)
 	if err != nil {
 		return 0
 	}

@@ -6,14 +6,14 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [classification, setClassification] = useState({
-    transito_normal: false,
-    morfologia_anomala: false,
-    asimetria_izquierda: false,
-    asimetria_derecha: false,
-    aumento_flujo_interior: false,
-    disminucion_flujo_interior: false,
-    tdv_marcada: false,
-    notas: ''
+    normal_transit: false,
+    anomalous_morphology: false,
+    left_asymmetry: false,
+    right_asymmetry: false,
+    increased_flux: false,
+    decreased_flux: false,
+    marked_tdv: false,
+    notes: ''
   })
 
   const saveTimeoutRef = useRef(null)
@@ -38,25 +38,25 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
       lastLoadedRef.current = { file, transitIndex }
       if (data) {
         setClassification({
-          transito_normal: data.transito_normal || false,
-          morfologia_anomala: data.morfologia_anomala || false,
-          asimetria_izquierda: data.asimetria_izquierda || false,
-          asimetria_derecha: data.asimetria_derecha || false,
-          aumento_flujo_interior: data.aumento_flujo_interior || false,
-          disminucion_flujo_interior: data.disminucion_flujo_interior || false,
-          tdv_marcada: data.tdv_marcada || false,
-          notas: data.notas || ''
+          normal_transit: data.normal_transit || false,
+          anomalous_morphology: data.anomalous_morphology || false,
+          left_asymmetry: data.left_asymmetry || false,
+          right_asymmetry: data.right_asymmetry || false,
+          increased_flux: data.increased_flux || false,
+          decreased_flux: data.decreased_flux || false,
+          marked_tdv: data.marked_tdv || false,
+          notes: data.notes || ''
         })
       } else {
         setClassification({
-          transito_normal: false,
-          morfologia_anomala: false,
-          asimetria_izquierda: false,
-          asimetria_derecha: false,
-          aumento_flujo_interior: false,
-          disminucion_flujo_interior: false,
-          tdv_marcada: false,
-          notas: ''
+          normal_transit: false,
+          anomalous_morphology: false,
+          left_asymmetry: false,
+          right_asymmetry: false,
+          increased_flux: false,
+          decreased_flux: false,
+          marked_tdv: false,
+          notes: ''
         })
       }
     } catch (err) {
@@ -102,7 +102,7 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
   const handleNotesChange = (e) => {
     const newClassification = {
       ...classification,
-      notas: e.target.value
+      notes: e.target.value
     }
     setClassification(newClassification)
     scheduleAutoSave(newClassification)
@@ -117,13 +117,13 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
   }
 
   const checkboxes = [
-    { field: 'transito_normal', labelKey: 'classification.normalMorphology' },
-    { field: 'morfologia_anomala', labelKey: 'classification.anomalousMorphology' },
-    { field: 'asimetria_izquierda', labelKey: 'classification.leftAsymmetry' },
-    { field: 'asimetria_derecha', labelKey: 'classification.rightAsymmetry' },
-    { field: 'aumento_flujo_interior', labelKey: 'classification.interiorFluxIncrease' },
-    { field: 'disminucion_flujo_interior', labelKey: 'classification.interiorFluxDecrease' },
-    { field: 'tdv_marcada', labelKey: 'classification.markedTdv' }
+    { field: 'normal_transit', labelKey: 'classification.normalMorphology' },
+    { field: 'anomalous_morphology', labelKey: 'classification.anomalousMorphology' },
+    { field: 'left_asymmetry', labelKey: 'classification.leftAsymmetry' },
+    { field: 'right_asymmetry', labelKey: 'classification.rightAsymmetry' },
+    { field: 'increased_flux', labelKey: 'classification.interiorFluxIncrease' },
+    { field: 'decreased_flux', labelKey: 'classification.interiorFluxDecrease' },
+    { field: 'marked_tdv', labelKey: 'classification.markedTdv' }
   ]
 
   const isClassified = checkboxes.some(({ field }) => classification[field])
@@ -162,7 +162,7 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
           <textarea
             class="textarea textarea-bordered textarea-sm h-20"
             placeholder={t('classification.notesPlaceholder')}
-            value={classification.notas}
+            value={classification.notes}
             onInput={handleNotesChange}
           ></textarea>
         </div>

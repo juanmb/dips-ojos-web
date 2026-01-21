@@ -52,7 +52,7 @@ func GetCurveTransits(c *gin.Context) {
 		return
 	}
 
-	transits := models.GetTransitsForFile(curve.NombreArchivo)
+	transits := models.GetTransitsForFile(curve.Filename)
 	if transits == nil {
 		transits = []models.Transit{}
 	}

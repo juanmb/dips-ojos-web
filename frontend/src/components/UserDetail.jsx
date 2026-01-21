@@ -140,31 +140,31 @@ export function UserDetail({ user }) {
                   <tbody>
                     <tr>
                       <td>{t('classification.normalMorphology')}</td>
-                      <td class="text-right font-mono">{stats.transito_normal}</td>
+                      <td class="text-right font-mono">{stats.normal_transit}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.anomalousMorphology')}</td>
-                      <td class="text-right font-mono">{stats.morfologia_anomala}</td>
+                      <td class="text-right font-mono">{stats.anomalous_morphology}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.leftAsymmetry')}</td>
-                      <td class="text-right font-mono">{stats.asimetria_izquierda}</td>
+                      <td class="text-right font-mono">{stats.left_asymmetry}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.rightAsymmetry')}</td>
-                      <td class="text-right font-mono">{stats.asimetria_derecha}</td>
+                      <td class="text-right font-mono">{stats.right_asymmetry}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.interiorFluxIncrease')}</td>
-                      <td class="text-right font-mono">{stats.aumento_flujo}</td>
+                      <td class="text-right font-mono">{stats.increased_flux}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.interiorFluxDecrease')}</td>
-                      <td class="text-right font-mono">{stats.disminucion_flujo}</td>
+                      <td class="text-right font-mono">{stats.decreased_flux}</td>
                     </tr>
                     <tr>
                       <td>{t('classification.markedTdv')}</td>
-                      <td class="text-right font-mono">{stats.tdv_marcada}</td>
+                      <td class="text-right font-mono">{stats.marked_tdv}</td>
                     </tr>
                     <tr>
                       <td>{t('userDetail.hasNotes')}</td>

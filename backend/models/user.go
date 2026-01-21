@@ -27,7 +27,7 @@ func GetUserByUsername(username string) (*User, error) {
 	var user User
 	var isAdmin int
 	err := db.DB.QueryRow(
-		"SELECT id, username, password_hash, fullname, is_admin FROM Usuarios WHERE username = ?",
+		"SELECT id, username, password_hash, fullname, is_admin FROM Users WHERE username = ?",
 		username,
 	).Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Fullname, &isAdmin)
 
@@ -42,7 +42,7 @@ func GetUserByID(id int64) (*User, error) {
 	var user User
 	var isAdmin int
 	err := db.DB.QueryRow(
-		"SELECT id, username, password_hash, fullname, is_admin FROM Usuarios WHERE id = ?",
+		"SELECT id, username, password_hash, fullname, is_admin FROM Users WHERE id = ?",
 		id,
 	).Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Fullname, &isAdmin)
 
@@ -64,8 +64,8 @@ func ListUsers() ([]UserWithStats, error) {
 			u.id, u.username, u.fullname, u.is_admin,
 			COUNT(c.id) as classified_transits,
 			MAX(c.timestamp) as last_activity
-		FROM Usuarios u
-		LEFT JOIN ClasificacionesTransitos c ON u.id = c.user_id
+		FROM Users u
+		LEFT JOIN Classifications c ON u.id = c.user_id
 		GROUP BY u.id
 		ORDER BY u.id
 	`)
@@ -106,7 +106,7 @@ func CreateUser(username, password, fullname string, isAdmin bool) (*User, error
 	}
 
 	result, err := db.DB.Exec(
-		"INSERT INTO Usuarios (username, password_hash, fullname, is_admin) VALUES (?, ?, ?, ?)",
+		"INSERT INTO Users (username, password_hash, fullname, is_admin) VALUES (?, ?, ?, ?)",
 		username, string(hash), fullname, isAdminInt,
 	)
 	if err != nil {
@@ -133,7 +133,7 @@ func UpdateUser(id int64, fullname string, isAdmin bool) error {
 	}
 
 	_, err := db.DB.Exec(
-		"UPDATE Usuarios SET fullname = ?, is_admin = ? WHERE id = ?",
+		"UPDATE Users SET fullname = ?, is_admin = ? WHERE id = ?",
 		fullname, isAdminInt, id,
 	)
 	return err
@@ -141,13 +141,13 @@ func UpdateUser(id int64, fullname string, isAdmin bool) error {
 
 func DeleteUser(id int64) error {
 	// Delete user's classifications first
-	_, err := db.DB.Exec("DELETE FROM ClasificacionesTransitos WHERE user_id = ?", id)
+	_, err := db.DB.Exec("DELETE FROM Classifications WHERE user_id = ?", id)
 	if err != nil {
 		return err
 	}
 
 	// Delete the user
-	_, err = db.DB.Exec("DELETE FROM Usuarios WHERE id = ?", id)
+	_, err = db.DB.Exec("DELETE FROM Users WHERE id = ?", id)
 	return err
 }
 
