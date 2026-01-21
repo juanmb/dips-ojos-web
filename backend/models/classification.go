@@ -118,8 +118,8 @@ func GetUserStats(userID int64) (*UserStats, error) {
 	// Curves completed (all transits classified)
 	err = db.DB.QueryRow(`
 		SELECT COUNT(*) FROM CurvasDeLuz c
-		WHERE c.num_expected_transits > 0
-		AND c.num_expected_transits <= (
+		WHERE c.found_transits > 0
+		AND c.found_transits <= (
 			SELECT COUNT(DISTINCT indice_transito)
 			FROM ClasificacionesTransitos
 			WHERE curve_id = c.id AND user_id = ?
@@ -165,7 +165,7 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 
 	// Get total transits and curves
 	err := db.DB.QueryRow(`
-		SELECT COUNT(*), SUM(num_expected_transits) FROM CurvasDeLuz WHERE num_expected_transits > 0
+		SELECT COUNT(*), SUM(found_transits) FROM CurvasDeLuz WHERE found_transits > 0
 	`).Scan(&stats.TotalCurves, &stats.TotalTransits)
 	if err != nil {
 		return nil, err
@@ -212,8 +212,8 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 	// Curves completed
 	err = db.DB.QueryRow(`
 		SELECT COUNT(*) FROM CurvasDeLuz c
-		WHERE c.num_expected_transits > 0
-		AND c.num_expected_transits <= (
+		WHERE c.found_transits > 0
+		AND c.found_transits <= (
 			SELECT COUNT(DISTINCT indice_transito)
 			FROM ClasificacionesTransitos
 			WHERE curve_id = c.id AND user_id = ?

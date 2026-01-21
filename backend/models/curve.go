@@ -12,6 +12,7 @@ type Curve struct {
 	TiempoMin           *float64 `json:"tiempo_min"`
 	TiempoMax           *float64 `json:"tiempo_max"`
 	NumExpectedTransits *int     `json:"num_expected_transits"`
+	FoundTransits       int      `json:"found_transits"`
 	TipoDatos           *string  `json:"tipo_datos"`
 	PeriodoOrbitalD     *float64 `json:"periodo_orbital_d"`
 	EpocaBJDS           *float64 `json:"epoca_bjds"`
@@ -31,7 +32,7 @@ type CurveWithProgress struct {
 func GetAllCurves() ([]Curve, error) {
 	rows, err := db.DB.Query(`
 		SELECT id, nombre_archivo, ruta_archivo, tiempo_min, tiempo_max,
-		       num_expected_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
+		       num_expected_transits, found_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
 		       duracion_d, radio_planeta_r_star, semieje_a_r_star, inc_planeta_deg, u1, u2
 		FROM CurvasDeLuz
 		ORDER BY nombre_archivo
@@ -46,7 +47,7 @@ func GetAllCurves() ([]Curve, error) {
 		var c Curve
 		err := rows.Scan(
 			&c.ID, &c.NombreArchivo, &c.RutaArchivo, &c.TiempoMin, &c.TiempoMax,
-			&c.NumExpectedTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
+			&c.NumExpectedTransits, &c.FoundTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
 			&c.DuracionD, &c.RadioPlanetaRStar, &c.SemiejeARStar, &c.IncPlanetaDeg, &c.U1, &c.U2,
 		)
 		if err != nil {
@@ -60,7 +61,7 @@ func GetAllCurves() ([]Curve, error) {
 func GetCurvesWithProgress(userID int64) ([]CurveWithProgress, error) {
 	rows, err := db.DB.Query(`
 		SELECT c.id, c.nombre_archivo, c.ruta_archivo, c.tiempo_min, c.tiempo_max,
-		       c.num_expected_transits, c.tipo_datos, c.periodo_orbital_d, c.epoca_bjds,
+		       c.num_expected_transits, c.found_transits, c.tipo_datos, c.periodo_orbital_d, c.epoca_bjds,
 		       c.duracion_d, c.radio_planeta_r_star, c.semieje_a_r_star, c.inc_planeta_deg, c.u1, c.u2,
 		       COALESCE((SELECT COUNT(DISTINCT indice_transito) FROM ClasificacionesTransitos
 		                 WHERE curve_id = c.id AND user_id = ?), 0) as classified_count
@@ -77,7 +78,7 @@ func GetCurvesWithProgress(userID int64) ([]CurveWithProgress, error) {
 		var c CurveWithProgress
 		err := rows.Scan(
 			&c.ID, &c.NombreArchivo, &c.RutaArchivo, &c.TiempoMin, &c.TiempoMax,
-			&c.NumExpectedTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
+			&c.NumExpectedTransits, &c.FoundTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
 			&c.DuracionD, &c.RadioPlanetaRStar, &c.SemiejeARStar, &c.IncPlanetaDeg, &c.U1, &c.U2,
 			&c.ClassifiedCount,
 		)
@@ -93,12 +94,12 @@ func GetCurveByID(id int64) (*Curve, error) {
 	var c Curve
 	err := db.DB.QueryRow(`
 		SELECT id, nombre_archivo, ruta_archivo, tiempo_min, tiempo_max,
-		       num_expected_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
+		       num_expected_transits, found_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
 		       duracion_d, radio_planeta_r_star, semieje_a_r_star, inc_planeta_deg, u1, u2
 		FROM CurvasDeLuz WHERE id = ?
 	`, id).Scan(
 		&c.ID, &c.NombreArchivo, &c.RutaArchivo, &c.TiempoMin, &c.TiempoMax,
-		&c.NumExpectedTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
+		&c.NumExpectedTransits, &c.FoundTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
 		&c.DuracionD, &c.RadioPlanetaRStar, &c.SemiejeARStar, &c.IncPlanetaDeg, &c.U1, &c.U2,
 	)
 	if err != nil {
@@ -111,12 +112,12 @@ func GetCurveByFilename(filename string) (*Curve, error) {
 	var c Curve
 	err := db.DB.QueryRow(`
 		SELECT id, nombre_archivo, ruta_archivo, tiempo_min, tiempo_max,
-		       num_expected_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
+		       num_expected_transits, found_transits, tipo_datos, periodo_orbital_d, epoca_bjds,
 		       duracion_d, radio_planeta_r_star, semieje_a_r_star, inc_planeta_deg, u1, u2
 		FROM CurvasDeLuz WHERE nombre_archivo = ?
 	`, filename).Scan(
 		&c.ID, &c.NombreArchivo, &c.RutaArchivo, &c.TiempoMin, &c.TiempoMax,
-		&c.NumExpectedTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
+		&c.NumExpectedTransits, &c.FoundTransits, &c.TipoDatos, &c.PeriodoOrbitalD, &c.EpocaBJDS,
 		&c.DuracionD, &c.RadioPlanetaRStar, &c.SemiejeARStar, &c.IncPlanetaDeg, &c.U1, &c.U2,
 	)
 	if err == sql.ErrNoRows {

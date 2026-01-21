@@ -18,16 +18,6 @@ func GetCurves(c *gin.Context) {
 		return
 	}
 
-	// Enrich with transit count from CSV if not in DB
-	for i := range curves {
-		if curves[i].NumExpectedTransits == nil || *curves[i].NumExpectedTransits == 0 {
-			count := models.GetTransitCount(curves[i].NombreArchivo)
-			if count > 0 {
-				curves[i].NumExpectedTransits = &count
-			}
-		}
-	}
-
 	c.JSON(http.StatusOK, curves)
 }
 
