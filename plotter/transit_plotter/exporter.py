@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, fields
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -28,7 +29,7 @@ class TransitRecord:
 
 @dataclass
 class LightCurveRecord:
-    """Data record for a light curve file, used for CSV export to populate CurvasDeLuz table."""
+    """Data record for a light curve file, used for CSV export."""
 
     file: str
     time_min: float
@@ -46,49 +47,65 @@ class LightCurveRecord:
     u2: float
 
 
+def _format_value(value: Any) -> Any:
+    """Format a value for CSV export."""
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        return f"{value:.10g}"
+    return value
+
+
+def _dataclass_to_row(record: Any) -> dict[str, Any]:
+    """Convert a dataclass instance to a dictionary with formatted values."""
+    return {f.name: _format_value(getattr(record, f.name)) for f in fields(record)}
+
+
+def _save_records_csv(
+    records: list[Any],
+    output_path: Path,
+    key_cols: list[str],
+    read_csv_kwargs: dict[str, Any] | None = None,
+) -> None:
+    """
+    Save dataclass records to a CSV file, merging with existing data.
+
+    New records update existing ones based on key columns.
+    Existing records not in the new batch are preserved.
+    """
+    if not records:
+        return
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    new_df = pd.DataFrame([_dataclass_to_row(r) for r in records])
+
+    if output_path.exists():
+        existing_df = pd.read_csv(output_path, **(read_csv_kwargs or {}))
+        merged_df = (
+            pd.concat([existing_df, new_df])
+            .drop_duplicates(subset=key_cols, keep="last")
+            .sort_values(key_cols)
+            .reset_index(drop=True)
+        )
+    else:
+        merged_df = new_df
+
+    merged_df.to_csv(output_path, index=False)
+
+
 def save_summary_csv(records: list[TransitRecord], output_path: Path) -> None:
     """
     Save transit records to a CSV file, merging with existing data.
 
     New records update existing ones based on (file, transit_index) key.
     Existing records not in the new batch are preserved.
-
-    Args:
-        records: List of TransitRecord objects.
-        output_path: Path for the output CSV file.
     """
-    if not records:
-        return
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    field_names = [f.name for f in fields(TransitRecord)]
-
-    new_rows = []
-    for record in records:
-        row = {}
-        for field_name in field_names:
-            value = getattr(record, field_name)
-            if value is None:
-                row[field_name] = ""
-            elif isinstance(value, float):
-                row[field_name] = f"{value:.10g}"
-            else:
-                row[field_name] = value
-        new_rows.append(row)
-
-    new_df = pd.DataFrame(new_rows)
-
-    if output_path.exists():
-        existing_df = pd.read_csv(output_path, dtype={"transit_index": int})
-        key_cols = ["file", "transit_index"]
-        merged_df = pd.concat([existing_df, new_df]).drop_duplicates(
-            subset=key_cols, keep="last"
-        )
-        merged_df = merged_df.sort_values(key_cols).reset_index(drop=True)
-    else:
-        merged_df = new_df
-
-    merged_df.to_csv(output_path, index=False)
+    _save_records_csv(
+        records,
+        output_path,
+        key_cols=["file", "transit_index"],
+        read_csv_kwargs={"dtype": {"transit_index": int}},
+    )
 
 
 def save_light_curves_csv(records: list[LightCurveRecord], output_path: Path) -> None:
@@ -97,39 +114,5 @@ def save_light_curves_csv(records: list[LightCurveRecord], output_path: Path) ->
 
     New records update existing ones based on file key.
     Existing records not in the new batch are preserved.
-
-    Args:
-        records: List of LightCurveRecord objects.
-        output_path: Path for the output CSV file.
     """
-    if not records:
-        return
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    field_names = [f.name for f in fields(LightCurveRecord)]
-
-    new_rows = []
-    for record in records:
-        row = {}
-        for field_name in field_names:
-            value = getattr(record, field_name)
-            if value is None:
-                row[field_name] = ""
-            elif isinstance(value, float):
-                row[field_name] = f"{value:.10g}"
-            else:
-                row[field_name] = value
-        new_rows.append(row)
-
-    new_df = pd.DataFrame(new_rows)
-
-    if output_path.exists():
-        existing_df = pd.read_csv(output_path)
-        merged_df = pd.concat([existing_df, new_df]).drop_duplicates(
-            subset=["file"], keep="last"
-        )
-        merged_df = merged_df.sort_values("file").reset_index(drop=True)
-    else:
-        merged_df = new_df
-
-    merged_df.to_csv(output_path, index=False)
+    _save_records_csv(records, output_path, key_cols=["file"])

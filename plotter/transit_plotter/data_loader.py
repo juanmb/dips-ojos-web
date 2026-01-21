@@ -2,6 +2,7 @@
 
 import warnings
 from pathlib import Path
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -17,45 +18,103 @@ from transit_plotter.types import (
     TransitParams,
 )
 
+ENCODINGS = ("utf-8", "latin-1")
 
-def get_file_type(filepath: Path) -> str | None:
-    """Determine file type (simulated/real) from header 'Type' field."""
-    for encoding in ("utf-8", "latin-1"):
-        try:
-            with open(filepath, encoding=encoding) as f:
-                for _ in range(40):
-                    line = f.readline()
-                    if not line:
-                        break
-                    cleaned = line.strip().strip('"')
-                    if ":" not in cleaned:
-                        continue
-                    key, value = cleaned.split(":", 1)
-                    if key.strip() != "Type":
-                        continue
-                    value = value.strip().strip('"').lower()
-                    if "simulacion" in value:
-                        return "simulated"
-                    if "real" in value:
-                        return "real"
-            break
-        except UnicodeDecodeError:
-            continue
-    return None
+# Parameter mappings: header key pattern -> (param_name, converter)
+_COMMON_PARAMS: dict[str, tuple[str, Callable]] = {
+    "Orbit Period (days)": ("Periodo_orbital_d", float),
+    "Transit Epoch (BJD)": ("Epoca_BJDS", float),
+    "Star Radius (R_star/R_solar)": ("R_star_R_sol", float),
+    "Planet Radius (R_planet/R_star)": ("Radio_Planeta_R_star", float),
+    "Orbital Eccentricity": ("ecc", float),
+    "Longitude of Periastron (deg)": ("w_deg", float),
+    "Exposure Time (days)": ("exp_time", float),
+    "Supersample Factor": ("supersample_factor", int),
+    "Type": ("Tipo_Datos", str),
+}
+
+_SIMULATED_PARAMS: dict[str, tuple[str, Callable]] = {
+    **_COMMON_PARAMS,
+    "Calculated Transit Duration (days)": ("Duracion_d", float),
+    "Planet Semi-major Axis (a/R_star)": ("Semieje_a_R_star", float),
+    "Limb Darkening Coeff (u1)": ("Coeficiente_LD_u1", float),
+    "Limb Darkening Coeff (u2)": ("Coeficiente_LD_u2", float),
+    "Planet Inclination (deg)": ("Inc_planeta_deg", float),
+    "Noise Sigma": ("Ruido_Sigma", float),
+    # Ground truth parameters
+    "Number of Spots": ("gt_n_manchas", int),
+    "Spot Size Min (R_star)": ("gt_tamano_min_mancha", float),
+    "Spot Size Max (R_star)": ("gt_tamano_max_mancha", float),
+    "Spot Contrast": ("gt_contraste_mancha", float),
+    "Satellite Radius (R_satellite/R_star)": ("gt_radio_exoluna", float),
+    "Satellite Orbital Period (days)": ("gt_periodo_exoluna", float),
+    "Satellite Semi-major Axis (a_sat/R_star)": ("gt_semieje_exoluna", float),
+    "TTV Amplitude (days)": ("gt_amplitud_ttv_dias", float),
+    "TTV Period (planet orbits)": ("gt_periodo_ttv_orbitas", float),
+    "TTV Phase (radians)": ("gt_fase_ttv_rad", float),
+}
+
+_REAL_PARAMS: dict[str, tuple[str, Callable]] = {
+    **_COMMON_PARAMS,
+    "Transit Duration (days)": ("Duracion_d", float),
+    "Semi-major Axis (a/R_star)": ("Semieje_a_R_star", float),
+    "Limb Darkening Coefficient u1": ("Coeficiente_LD_u1", float),
+    "Limb Darkening Coefficient u2": ("Coeficiente_LD_u2", float),
+    "Orbital Inclination (deg)": ("Inc_planeta_deg", float),
+    "Planet Name": ("Nombre_Objeto", str),
+    "Star Teff (K)": ("Teff_star", float),
+    "Star logg": ("logg_star", float),
+}
+
+_SIMULATED_DEFAULTS: dict[str, float | int] = {
+    "ecc": DEFAULT_ECC,
+    "w_deg": DEFAULT_W,
+}
+
+_REAL_DEFAULTS: dict[str, float | int] = {
+    "ecc": DEFAULT_ECC,
+    "w_deg": DEFAULT_W,
+    "exp_time": DEFAULT_EXP_TIME,
+    "supersample_factor": DEFAULT_SUPERSAMPLE,
+    "Coeficiente_LD_u1": DEFAULT_U1,
+    "Coeficiente_LD_u2": DEFAULT_U2,
+    "Inc_planeta_deg": DEFAULT_INC,
+}
 
 
-def _read_file_lines(filepath: Path) -> list[str]:
-    """Read file lines with encoding fallback."""
-    for encoding in ("utf-8", "latin-1"):
+def _read_with_encoding_fallback(filepath: Path) -> list[str]:
+    """Read file lines trying multiple encodings."""
+    for encoding in ENCODINGS:
         try:
             with open(filepath, encoding=encoding) as f:
                 return f.readlines()
         except UnicodeDecodeError:
-            if encoding == "utf-8":
-                warnings.warn(f"UTF-8 decode error in '{filepath}', trying latin-1")
-                continue
-            raise
+            if encoding == ENCODINGS[-1]:
+                raise
+            warnings.warn(f"{encoding.upper()} decode error in '{filepath}', trying next encoding")
     raise IOError(f"Could not read file '{filepath}'")
+
+
+def get_file_type(filepath: Path) -> str | None:
+    """Determine file type (simulated/real) from header 'Type' field."""
+    try:
+        lines = _read_with_encoding_fallback(filepath)
+    except (IOError, UnicodeDecodeError):
+        return None
+
+    for line in lines[:40]:
+        cleaned = line.strip().strip('"')
+        if ":" not in cleaned:
+            continue
+        key, value = cleaned.split(":", 1)
+        if key.strip() != "Type":
+            continue
+        value = value.strip().strip('"').lower()
+        if "simulacion" in value:
+            return "simulated"
+        if "real" in value:
+            return "real"
+    return None
 
 
 def _find_data_start(lines: list[str]) -> int:
@@ -67,143 +126,68 @@ def _find_data_start(lines: list[str]) -> int:
     return -1
 
 
-def _find_matching_param(key: str, param_mapping: dict) -> tuple | None:
-    """Find a parameter mapping using substring matching (like app.py does)."""
+def _parse_header(
+    lines: list[str],
+    filepath: Path,
+    param_mapping: dict[str, tuple[str, Callable]],
+    defaults: dict[str, float | int],
+    extract_first_token: bool = False,
+) -> TransitParams:
+    """Parse header parameters from a data file.
+
+    Args:
+        lines: File lines to parse.
+        filepath: Path to file (for error messages).
+        param_mapping: Dict mapping header patterns to (param_name, converter).
+        defaults: Default values to apply after parsing.
+        extract_first_token: If True, extract first whitespace-separated token
+            before converting (used for real data with units).
+    """
+    params: TransitParams = {}
+
+    for line in lines:
+        cleaned = line.strip().strip('"')
+        if "Tiempo [BJDS]" in cleaned:
+            break
+        if ":" not in cleaned:
+            continue
+
+        key, value_str = cleaned.split(":", 1)
+        key = key.strip()
+        value_str = value_str.strip().strip('"')
+
+        match = _find_matching_param(key, param_mapping)
+        if match is None:
+            continue
+
+        param_name, converter = match
+        try:
+            if converter == str:
+                params[param_name] = value_str
+            else:
+                raw = value_str.split()[0] if extract_first_token else value_str
+                params[param_name] = converter(raw)
+        except (ValueError, IndexError):
+            warnings.warn(f"Could not convert '{key}': '{value_str}' in '{filepath}'")
+
+    for key, value in defaults.items():
+        params.setdefault(key, value)
+
+    return params
+
+
+def _find_matching_param(
+    key: str, param_mapping: dict[str, tuple[str, Callable]]
+) -> tuple[str, Callable] | None:
+    """Find a parameter mapping using substring matching."""
     for pattern, value in param_mapping.items():
         if pattern in key:
             return value
     return None
 
 
-def _parse_simulated_header(lines: list[str], filepath: Path) -> TransitParams:
-    """Parse header parameters from simulated data file."""
-    params: TransitParams = {}
-
-    param_mapping = {
-        "Orbit Period (days)": ("Periodo_orbital_d", float),
-        "Transit Epoch (BJD)": ("Epoca_BJDS", float),
-        "Calculated Transit Duration (days)": ("Duracion_d", float),
-        "Star Radius (R_star/R_solar)": ("R_star_R_sol", float),
-        "Planet Radius (R_planet/R_star)": ("Radio_Planeta_R_star", float),
-        "Planet Semi-major Axis (a/R_star)": ("Semieje_a_R_star", float),
-        "Limb Darkening Coeff (u1)": ("Coeficiente_LD_u1", float),
-        "Limb Darkening Coeff (u2)": ("Coeficiente_LD_u2", float),
-        "Planet Inclination (deg)": ("Inc_planeta_deg", float),
-        "Orbital Eccentricity": ("ecc", float),
-        "Longitude of Periastron (deg)": ("w_deg", float),
-        "Exposure Time (days)": ("exp_time", float),
-        "Supersample Factor": ("supersample_factor", int),
-        "Noise Sigma": ("Ruido_Sigma", float),
-        "Type": ("Tipo_Datos", str),
-        # Ground truth parameters
-        "Number of Spots": ("gt_n_manchas", int),
-        "Spot Size Min (R_star)": ("gt_tamano_min_mancha", float),
-        "Spot Size Max (R_star)": ("gt_tamano_max_mancha", float),
-        "Spot Contrast": ("gt_contraste_mancha", float),
-        "Satellite Radius (R_satellite/R_star)": ("gt_radio_exoluna", float),
-        "Satellite Orbital Period (days)": ("gt_periodo_exoluna", float),
-        "Satellite Semi-major Axis (a_sat/R_star)": ("gt_semieje_exoluna", float),
-        "TTV Amplitude (days)": ("gt_amplitud_ttv_dias", float),
-        "TTV Period (planet orbits)": ("gt_periodo_ttv_orbitas", float),
-        "TTV Phase (radians)": ("gt_fase_ttv_rad", float),
-    }
-
-    for line in lines:
-        cleaned = line.strip().strip('"')
-        if "Tiempo [BJDS]" in cleaned:
-            break
-        if ":" not in cleaned:
-            continue
-
-        key, value_str = cleaned.split(":", 1)
-        key = key.strip()
-        value_str = value_str.strip().strip('"')
-
-        match = _find_matching_param(key, param_mapping)
-        if match is None:
-            continue
-
-        param_name, converter = match
-        try:
-            if converter == str:
-                params[param_name] = value_str
-            else:
-                params[param_name] = converter(value_str)
-        except (ValueError, IndexError):
-            warnings.warn(f"Could not convert '{key}': '{value_str}' in '{filepath}'")
-
-    # Set defaults
-    params.setdefault("ecc", DEFAULT_ECC)
-    params.setdefault("w_deg", DEFAULT_W)
-
-    return params
-
-
-def _parse_real_header(lines: list[str], filepath: Path) -> TransitParams:
-    """Parse header parameters from real data file."""
-    params: TransitParams = {}
-
-    param_mapping = {
-        "Orbit Period (days)": ("Periodo_orbital_d", float),
-        "Transit Duration (days)": ("Duracion_d", float),
-        "Transit Epoch (BJD)": ("Epoca_BJDS", float),
-        "Star Radius (R_star/R_solar)": ("R_star_R_sol", float),
-        "Planet Radius (R_planet/R_star)": ("Radio_Planeta_R_star", float),
-        "Semi-major Axis (a/R_star)": ("Semieje_a_R_star", float),
-        "Limb Darkening Coefficient u1": ("Coeficiente_LD_u1", float),
-        "Limb Darkening Coefficient u2": ("Coeficiente_LD_u2", float),
-        "Orbital Inclination (deg)": ("Inc_planeta_deg", float),
-        "Type": ("Tipo_Datos", str),
-        "Planet Name": ("Nombre_Objeto", str),
-        "Star Teff (K)": ("Teff_star", float),
-        "Star logg": ("logg_star", float),
-        "Orbital Eccentricity": ("ecc", float),
-        "Longitude of Periastron (deg)": ("w_deg", float),
-        "Exposure Time (days)": ("exp_time", float),
-        "Supersample Factor": ("supersample_factor", int),
-    }
-
-    for line in lines:
-        cleaned = line.strip().strip('"')
-        if "Tiempo [BJDS]" in cleaned:
-            break
-        if ":" not in cleaned:
-            continue
-
-        key, value_str = cleaned.split(":", 1)
-        key = key.strip()
-        value_str = value_str.strip().strip('"')
-
-        match = _find_matching_param(key, param_mapping)
-        if match is None:
-            continue
-
-        param_name, converter = match
-        try:
-            if converter == str:
-                params[param_name] = value_str
-            elif converter == int:
-                params[param_name] = int(value_str.split()[0])
-            else:
-                params[param_name] = float(value_str.split()[0])
-        except (ValueError, IndexError):
-            warnings.warn(f"Could not convert '{key}': '{value_str}' in '{filepath}'")
-
-    # Set defaults for real data
-    params.setdefault("ecc", DEFAULT_ECC)
-    params.setdefault("w_deg", DEFAULT_W)
-    params.setdefault("exp_time", DEFAULT_EXP_TIME)
-    params.setdefault("supersample_factor", DEFAULT_SUPERSAMPLE)
-    params.setdefault("Coeficiente_LD_u1", DEFAULT_U1)
-    params.setdefault("Coeficiente_LD_u2", DEFAULT_U2)
-    params.setdefault("Inc_planeta_deg", DEFAULT_INC)
-
-    return params
-
-
 def load_light_curve(filepath: Path) -> tuple[np.ndarray, np.ndarray, TransitParams, str]:
-    """
-    Load light curve data from a CSV file.
+    """Load light curve data from a CSV file.
 
     Args:
         filepath: Path to the CSV file.
@@ -217,7 +201,7 @@ def load_light_curve(filepath: Path) -> tuple[np.ndarray, np.ndarray, TransitPar
         IOError: If the file cannot be read.
     """
     filepath = Path(filepath)
-    lines = _read_file_lines(filepath)
+    lines = _read_with_encoding_fallback(filepath)
 
     data_start = _find_data_start(lines)
     if data_start == -1:
@@ -225,9 +209,11 @@ def load_light_curve(filepath: Path) -> tuple[np.ndarray, np.ndarray, TransitPar
 
     file_type = get_file_type(filepath)
     if file_type == "simulated":
-        params = _parse_simulated_header(lines, filepath)
+        params = _parse_header(lines, filepath, _SIMULATED_PARAMS, _SIMULATED_DEFAULTS)
     else:
-        params = _parse_real_header(lines, filepath)
+        params = _parse_header(
+            lines, filepath, _REAL_PARAMS, _REAL_DEFAULTS, extract_first_token=True
+        )
         file_type = "real"
 
     try:
