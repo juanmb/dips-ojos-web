@@ -1,7 +1,7 @@
 -- Add found_transits column to CurvasDeLuz
 ALTER TABLE CurvasDeLuz ADD COLUMN found_transits INTEGER DEFAULT 0;
 
--- Transits table (populated from transit_summary.csv at startup)
+-- Transits table (populated from transits.csv at startup)
 CREATE TABLE IF NOT EXISTS Transitos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     curve_id INTEGER NOT NULL,

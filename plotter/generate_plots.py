@@ -119,7 +119,7 @@ def main(
     if not dry_run:
         click.echo(f"\nGenerated {len(records)} transit plots in {output_dir}")
         if records:
-            click.echo(f"Summary saved to {output_dir / 'transit_summary.csv'}")
+            click.echo(f"Summary saved to {output_dir / 'transits.csv'}")
 
 
 if __name__ == "__main__":

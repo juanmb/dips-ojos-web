@@ -1,4 +1,4 @@
-.PHONY: help setup plots plots-force docker-build docker-up docker-down docker-logs dev-backend dev-frontend dev clean encrypt decrypt
+.PHONY: help setup plots plots-force plots-test docker-build docker-up docker-down docker-logs dev-backend dev-frontend dev clean encrypt decrypt
 
 help:
 	@echo "Usage: make <target>"
@@ -7,6 +7,7 @@ help:
 	@echo "  setup         Initialize development environment"
 	@echo "  plots         Generate transit plots from data/ to plots/"
 	@echo "  plots-force   Regenerate all plots (even existing ones)"
+	@echo "  plots-test    Run plotter tests"
 	@echo "  docker-build  Build Docker image"
 	@echo "  docker-up     Start application with Docker Compose"
 	@echo "  docker-down   Stop application"
@@ -31,6 +32,9 @@ plots:
 
 plots-force:
 	cd plotter && uv sync && uv run python generate_plots.py -i ../data -o ../plots -v --force
+
+plots-test:
+	cd plotter && uv sync && uv run pytest
 
 # Docker
 docker-build:
@@ -59,7 +63,7 @@ dev:
 
 # Cleanup
 clean:
-	rm -rf plots/*.png plots/transit_summary.csv
+	rm -rf plots/*.png plots/transits.csv plots/curves.csv
 	rm -rf frontend/dist
 	rm -rf backend/emoons-web backend/tmp
 	rm -rf plotter/.venv

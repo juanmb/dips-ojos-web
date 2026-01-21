@@ -41,6 +41,7 @@ make docker-up
 make setup          Initialize development environment
 make plots          Generate transit plots from data/ to plots/
 make plots-force    Regenerate all plots (even existing ones)
+make plots-test     Run plotter tests
 make docker-build   Build Docker image
 make docker-up      Start application with Docker Compose
 make docker-down    Stop application
@@ -117,7 +118,7 @@ make dev-frontend
 - `JWT_SECRET`: Secret key for JWT tokens
 - `PORT`: Server port (default: `8080`)
 - `DATABASE_PATH`: SQLite database path (default: `../db/transit_analysis.db`)
-- `CSV_PATH`: Transit summary CSV (default: `../plots/transit_summary.csv`)
+- `CSV_PATH`: Transit summary CSV (default: `../plots/transits.csv`)
 - `PLOTS_DIR`: Plot images directory (default: `../plots`)
 - `FRONTEND_DIR`: Built frontend assets (empty = dev mode with Vite proxy)
 
@@ -142,7 +143,8 @@ Place CSV files in `data/`. Each file should contain:
 
 The plot generator creates in `plots/`:
 - `*.png`: Individual transit plot images
-- `transit_summary.csv`: Transit metadata for all processed files
+- `transits.csv`: Transit metadata for all processed files
+- `curves.csv`: Light curve metadata for all processed files
 
 ## User Management
 

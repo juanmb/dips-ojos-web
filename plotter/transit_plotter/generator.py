@@ -35,7 +35,7 @@ from transit_plotter.types import (
 
 logger = logging.getLogger(__name__)
 
-FAILED_TRANSITS_FILE = "failed_transits.json"
+FAILED_TRANSITS_FILE = "_failed_transits.json"
 
 
 @dataclass
@@ -407,12 +407,12 @@ def generate_all(
             logger.error(f"Error processing {filepath}: {e}")
 
     if all_transit_records:
-        csv_path = output_dir / "transit_summary.csv"
+        csv_path = output_dir / "transits.csv"
         save_summary_csv(all_transit_records, csv_path)
         logger.info(f"Saved transit summary to {csv_path}")
 
     if all_curve_records:
-        csv_path = output_dir / "light_curves.csv"
+        csv_path = output_dir / "curves.csv"
         save_light_curves_csv(all_curve_records, csv_path)
         logger.info(f"Saved light curves to {csv_path}")
 

@@ -34,7 +34,7 @@ RUN mkdir -p /plots /db
 
 # Environment variables
 ENV DATABASE_PATH=/db/transit_analysis.db
-ENV CSV_PATH=/plots/transit_summary.csv
+ENV CSV_PATH=/plots/transits.csv
 ENV PLOTS_DIR=/plots
 ENV FRONTEND_DIR=/app/frontend/dist
 ENV PORT=8080
