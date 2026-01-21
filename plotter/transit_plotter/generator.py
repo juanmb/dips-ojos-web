@@ -8,7 +8,12 @@ import numpy as np
 import pandas as pd
 
 from transit_plotter.data_loader import load_light_curve
-from transit_plotter.exporter import TransitRecord, save_summary_csv
+from transit_plotter.exporter import (
+    LightCurveRecord,
+    TransitRecord,
+    save_light_curves_csv,
+    save_summary_csv,
+)
 from transit_plotter.plotter import plot_transit
 from transit_plotter.transit_model import (
     batman_model,
@@ -53,7 +58,7 @@ def process_file(
     dpi: int = 150,
     skip_fitting: bool = False,
     force: bool = False,
-) -> list[TransitRecord]:
+) -> tuple[list[TransitRecord], LightCurveRecord | None]:
     """
     Process a single light curve file and generate transit plots.
 
@@ -65,7 +70,7 @@ def process_file(
         force: If True, regenerate plots even if they already exist.
 
     Returns:
-        List of TransitRecord objects for the CSV summary.
+        Tuple of (transit_records, light_curve_record).
     """
     basename = filepath.stem
     logger.info(f"Processing {filepath.name}")
@@ -74,7 +79,7 @@ def process_file(
         time, flux, params, data_type = load_light_curve(filepath)
     except Exception as e:
         logger.error(f"Failed to load {filepath}: {e}")
-        return []
+        return [], None
 
     # Get parameters
     period = _get_param(params, "Periodo_orbital_d", None)
@@ -83,13 +88,13 @@ def process_file(
 
     if period is None or t0_epoch is None:
         logger.error(f"Missing period or epoch in {filepath}")
-        return []
+        return [], None
 
     # Calculate expected transit times
     expected_t0s = calculate_expected_transit_times(time, t0_epoch, period)
     if len(expected_t0s) == 0:
         logger.warning(f"No transits found in data range for {filepath}")
-        return []
+        return [], None
 
     logger.info(f"Found {len(expected_t0s)} expected transits")
 
@@ -111,9 +116,38 @@ def process_file(
             continue
         missing_transits.append(i)
 
+    # Extract parameters (needed for LightCurveRecord even if skipping transit processing)
+    exp_time = _get_param(params, "exp_time", DEFAULT_EXP_TIME)
+    supersample = int(_get_param(params, "supersample_factor", DEFAULT_SUPERSAMPLE))
+    inc = _get_param(params, "Inc_planeta_deg", 89.0)
+    u1 = _get_param(params, "Coeficiente_LD_u1", 0.65)
+    u2 = _get_param(params, "Coeficiente_LD_u2", 0.08)
+    ecc = _get_param(params, "ecc", 0.0)
+    w = _get_param(params, "w_deg", 90.0)
+    rp_param = _get_param(params, "Radio_Planeta_R_star", 0.1)
+    a_param = _get_param(params, "Semieje_a_R_star", 8.0)
+
+    def _make_curve_record(found: int, rp: float, a: float) -> LightCurveRecord:
+        return LightCurveRecord(
+            file=filepath.name,
+            time_min=float(time.min()),
+            time_max=float(time.max()),
+            expected_transits=len(expected_t0s),
+            found_transits=found,
+            data_type=data_type,
+            period=period,
+            epoch=t0_epoch,
+            duration=duration,
+            rp=rp,
+            a=a,
+            inc=inc,
+            u1=u1,
+            u2=u2,
+        )
+
     if not missing_transits:
         logger.info(f"All {len(expected_t0s)} plots already exist or failed, skipping {filepath.name}")
-        return []
+        return [], _make_curve_record(0, rp_param, a_param)
 
     logger.info(f"{len(missing_transits)} of {len(expected_t0s)} plots need to be generated")
 
@@ -123,17 +157,10 @@ def process_file(
         rp_global, a_global = fit_global_parameters(time, flux, params, expected_t0s)
         logger.info(f"Global fit: rp={rp_global:.6f}, a={a_global:.6f}")
     else:
-        rp_global = _get_param(params, "Radio_Planeta_R_star", 0.1)
-        a_global = _get_param(params, "Semieje_a_R_star", 8.0)
+        rp_global = rp_param
+        a_global = a_param
 
     records = []
-    exp_time = _get_param(params, "exp_time", DEFAULT_EXP_TIME)
-    supersample = int(_get_param(params, "supersample_factor", DEFAULT_SUPERSAMPLE))
-    inc = _get_param(params, "Inc_planeta_deg", 89.0)
-    u1 = _get_param(params, "Coeficiente_LD_u1", 0.65)
-    u2 = _get_param(params, "Coeficiente_LD_u2", 0.08)
-    ecc = _get_param(params, "ecc", 0.0)
-    w = _get_param(params, "w_deg", 90.0)
 
     for i, t0_expected in enumerate(expected_t0s):
         transit_num = i + 1
@@ -253,7 +280,8 @@ def process_file(
         logger.info(f"Marked {len(new_failed)} transits as failed for {filepath.name}")
 
     logger.info(f"Generated {len(records)} plots for {filepath.name}")
-    return records
+
+    return records, _make_curve_record(len(records), rp_global, a_global)
 
 
 def generate_all(
@@ -304,18 +332,29 @@ def generate_all(
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    all_records = []
+    all_transit_records = []
+    all_curve_records = []
     for filepath in csv_files:
         try:
-            records = process_file(filepath, output_dir, dpi=dpi, skip_fitting=skip_fitting, force=force)
-            all_records.extend(records)
+            transit_records, curve_record = process_file(
+                filepath, output_dir, dpi=dpi, skip_fitting=skip_fitting, force=force
+            )
+            all_transit_records.extend(transit_records)
+            if curve_record is not None:
+                all_curve_records.append(curve_record)
         except Exception as e:
             logger.error(f"Error processing {filepath}: {e}")
 
-    # Save summary CSV
-    if all_records:
+    # Save transit summary CSV
+    if all_transit_records:
         csv_path = output_dir / "transit_summary.csv"
-        save_summary_csv(all_records, csv_path)
-        logger.info(f"Saved summary to {csv_path}")
+        save_summary_csv(all_transit_records, csv_path)
+        logger.info(f"Saved transit summary to {csv_path}")
 
-    return all_records
+    # Save light curves CSV
+    if all_curve_records:
+        csv_path = output_dir / "light_curves.csv"
+        save_light_curves_csv(all_curve_records, csv_path)
+        logger.info(f"Saved light curves to {csv_path}")
+
+    return all_transit_records
