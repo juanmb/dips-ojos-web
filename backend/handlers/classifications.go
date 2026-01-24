@@ -76,6 +76,17 @@ func SaveClassification(c *gin.Context) {
 		return
 	}
 
+	// If all fields are empty, delete existing classification instead of saving
+	if !input.LeftAsymmetry && !input.RightAsymmetry &&
+		!input.IncreasedFlux && !input.DecreasedFlux &&
+		!input.NormalTransit && !input.AnomalousMorphology &&
+		!input.MarkedTDV && !input.BadModelFit &&
+		input.Notes == "" {
+		_ = models.DeleteClassification(curve.ID, index-1, userID)
+		c.JSON(http.StatusOK, gin.H{"message": "Empty classification removed"})
+		return
+	}
+
 	// Get transit data from CSV to fill in timing info
 	transit := models.GetTransit(filename, index)
 	if transit != nil {

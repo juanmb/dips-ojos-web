@@ -134,6 +134,14 @@ func GetUserStats(userID int64) (*UserStats, error) {
 	return &stats, nil
 }
 
+func DeleteClassification(curveID int64, transitIndex int, userID int64) error {
+	_, err := db.DB.Exec(`
+		DELETE FROM Classifications
+		WHERE curve_id = ? AND transit_index = ? AND user_id = ?
+	`, curveID, transitIndex, userID)
+	return err
+}
+
 func DeleteCurveClassifications(curveID int64, userID int64) (int64, error) {
 	result, err := db.DB.Exec(`
 		DELETE FROM Classifications
