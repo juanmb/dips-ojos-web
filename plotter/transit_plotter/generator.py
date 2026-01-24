@@ -265,6 +265,7 @@ def process_file(
     failed_for_file = set(all_failed.get(filepath.name, []))
 
     transits_to_process = []
+    skipped_failed = []
     for i, t0 in enumerate(expected_t0s):
         transit_num = i + 1
         plot_path = output_dir / f"{basename}_transit_{transit_num:03d}.png"
@@ -274,17 +275,19 @@ def process_file(
                 continue
             if transit_num in failed_for_file:
                 logger.debug(f"Transit {transit_num}: previously failed, skipping")
+                skipped_failed.append((transit_num, t0))
                 continue
 
         transits_to_process.append((transit_num, t0, plot_path))
 
-    if not transits_to_process:
-        logger.info(f"All {len(expected_t0s)} plots already exist or failed, skipping {filepath.name}")
+    if not transits_to_process and not skipped_failed:
+        logger.info(f"All {len(expected_t0s)} plots already exist, skipping {filepath.name}")
         return [], make_curve_record(0, model_params.rp, model_params.a)
 
-    logger.info(f"{len(transits_to_process)} of {len(expected_t0s)} plots need to be generated")
+    if transits_to_process:
+        logger.info(f"{len(transits_to_process)} of {len(expected_t0s)} plots need to be generated")
 
-    if skip_fitting:
+    if not transits_to_process or skip_fitting:
         rp_global = model_params.rp
         a_global = model_params.a
     else:
@@ -294,6 +297,25 @@ def process_file(
 
     records = []
     new_failed = []
+
+    for transit_num, t0_expected in skipped_failed:
+        records.append(
+            TransitRecord(
+                file=filepath.name,
+                transit_index=transit_num,
+                t0_expected=t0_expected,
+                t0_fitted=None,
+                ttv_minutes=None,
+                rp_fitted=rp_global,
+                a_fitted=a_global,
+                rms_residuals=None,
+                period=period,
+                duration=duration,
+                inc=model_params.inc,
+                u1=model_params.u1,
+                u2=model_params.u2,
+            )
+        )
 
     for transit_num, t0_expected, plot_path in transits_to_process:
         logger.debug(f"Processing transit {transit_num}/{len(expected_t0s)}")
@@ -316,6 +338,23 @@ def process_file(
 
         if fit_result is None:
             new_failed.append(transit_num)
+            records.append(
+                TransitRecord(
+                    file=filepath.name,
+                    transit_index=transit_num,
+                    t0_expected=t0_expected,
+                    t0_fitted=None,
+                    ttv_minutes=None,
+                    rp_fitted=rp_global,
+                    a_fitted=a_global,
+                    rms_residuals=None,
+                    period=period,
+                    duration=duration,
+                    inc=model_params.inc,
+                    u1=model_params.u1,
+                    u2=model_params.u2,
+                )
+            )
             continue
 
         records.append(

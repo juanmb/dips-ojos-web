@@ -47,6 +47,12 @@ func main() {
 		log.Fatalf("Failed to ensure admin user: %v", err)
 	}
 
+	// Load curves from CSV
+	curvesCsvPath := getEnv("CURVES_CSV_PATH", "../plots/curves.csv")
+	if err := models.LoadCurvesFromCSV(curvesCsvPath); err != nil {
+		log.Printf("Warning: Failed to load curves CSV: %v", err)
+	}
+
 	// Load transit data from CSV
 	if err := models.LoadTransitsFromCSV(csvPath); err != nil {
 		log.Printf("Warning: Failed to load transits CSV: %v", err)

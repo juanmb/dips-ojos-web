@@ -12,7 +12,7 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
   const getCurveName = (curve) => t('curves.curve', { id: curve.id })
 
   const isCompleted = (curve) => {
-    const total = curve.found_transits || 0
+    const total = curve.num_expected_transits || 0
     const classified = curve.classified_count || 0
     return total > 0 && classified >= total
   }
@@ -36,7 +36,7 @@ export function CurveList({ curves = [], selectedCurve, onSelectCurve }) {
     <div class="flex-1 overflow-y-auto" ref={listRef}>
       <ul class="menu menu-sm p-2">
         {curveList.map(curve => {
-          const total = curve.found_transits || 0
+          const total = curve.num_expected_transits || 0
           const classified = curve.classified_count || 0
           const progress = total > 0 ? Math.round((classified / total) * 100) : 0
           const isSelected = selectedCurve?.id === curve.id

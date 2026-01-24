@@ -120,8 +120,8 @@ func GetUserStats(userID int64) (*UserStats, error) {
 
 	err = db.DB.QueryRow(`
 		SELECT COUNT(*) FROM Curves c
-		WHERE c.found_transits > 0
-		AND c.found_transits <= (
+		WHERE c.num_expected_transits > 0
+		AND c.num_expected_transits <= (
 			SELECT COUNT(DISTINCT transit_index)
 			FROM Classifications
 			WHERE curve_id = c.id AND user_id = ?
@@ -167,7 +167,7 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 	var stats DetailedUserStats
 
 	err := db.DB.QueryRow(`
-		SELECT COUNT(*), SUM(found_transits) FROM Curves WHERE found_transits > 0
+		SELECT COUNT(*), COALESCE(SUM(num_expected_transits), 0) FROM Curves WHERE num_expected_transits > 0
 	`).Scan(&stats.TotalCurves, &stats.TotalTransits)
 	if err != nil {
 		return nil, err
@@ -213,8 +213,8 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 
 	err = db.DB.QueryRow(`
 		SELECT COUNT(*) FROM Curves c
-		WHERE c.found_transits > 0
-		AND c.found_transits <= (
+		WHERE c.num_expected_transits > 0
+		AND c.num_expected_transits <= (
 			SELECT COUNT(DISTINCT transit_index)
 			FROM Classifications
 			WHERE curve_id = c.id AND user_id = ?

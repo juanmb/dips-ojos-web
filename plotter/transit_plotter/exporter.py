@@ -24,7 +24,7 @@ class TransitRecord:
     inc: float
     u1: float
     u2: float
-    plot_file: str
+    plot_file: str = ""
 
 
 @dataclass
