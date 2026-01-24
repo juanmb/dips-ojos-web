@@ -14,6 +14,7 @@ services:
     environment:
       - DATABASE_PATH=/db/transit_analysis.db
       - CSV_PATH=/plots/transits.csv
+      - CURVES_CSV_PATH=/plots/curves.csv
       - PLOTS_DIR=/plots
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
