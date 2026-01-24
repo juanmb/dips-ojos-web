@@ -24,7 +24,7 @@ func getEnv(key, defaultValue string) string {
 func main() {
 	// Configuration
 	dbPath := getEnv("DATABASE_PATH", "../db/transit_analysis.db")
-	csvPath := getEnv("CSV_PATH", "../plots/transits.csv")
+	csvPath := getEnv("TRANSITS_CSV_PATH", "../plots/transits.csv")
 	plotsDir := getEnv("PLOTS_DIR", "../plots")
 	frontendDir := getEnv("FRONTEND_DIR", "")
 	port := getEnv("PORT", "8080")

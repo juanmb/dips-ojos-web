@@ -118,7 +118,8 @@ make dev-frontend
 - `JWT_SECRET`: Secret key for JWT tokens
 - `PORT`: Server port (default: `8080`)
 - `DATABASE_PATH`: SQLite database path (default: `../db/transit_analysis.db`)
-- `CSV_PATH`: Transit summary CSV (default: `../plots/transits.csv`)
+- `TRANSITS_CSV_PATH`: Transits CSV (default: `../plots/transits.csv`)
+- `CURVES_CSV_PATH`: Curves CSV (default: `../plots/curves.csv`)
 - `PLOTS_DIR`: Plot images directory (default: `../plots`)
 - `FRONTEND_DIR`: Built frontend assets (empty = dev mode with Vite proxy)
 
