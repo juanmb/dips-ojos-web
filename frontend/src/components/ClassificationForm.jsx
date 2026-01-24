@@ -13,6 +13,7 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
     increased_flux: false,
     decreased_flux: false,
     marked_tdv: false,
+    bad_model_fit: false,
     notes: ''
   })
 
@@ -45,6 +46,7 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
           increased_flux: data.increased_flux || false,
           decreased_flux: data.decreased_flux || false,
           marked_tdv: data.marked_tdv || false,
+          bad_model_fit: data.bad_model_fit || false,
           notes: data.notes || ''
         })
       } else {
@@ -56,6 +58,7 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
           increased_flux: false,
           decreased_flux: false,
           marked_tdv: false,
+          bad_model_fit: false,
           notes: ''
         })
       }
@@ -123,7 +126,8 @@ export function ClassificationForm({ file, transitIndex, onSaved }) {
     { field: 'right_asymmetry', labelKey: 'classification.rightAsymmetry' },
     { field: 'increased_flux', labelKey: 'classification.interiorFluxIncrease' },
     { field: 'decreased_flux', labelKey: 'classification.interiorFluxDecrease' },
-    { field: 'marked_tdv', labelKey: 'classification.markedTdv' }
+    { field: 'marked_tdv', labelKey: 'classification.markedTdv' },
+    { field: 'bad_model_fit', labelKey: 'classification.badModelFit' }
   ]
 
   const isClassified = checkboxes.some(({ field }) => classification[field])

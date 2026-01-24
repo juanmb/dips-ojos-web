@@ -21,6 +21,7 @@ type Classification struct {
 	NormalTransit       bool       `json:"normal_transit"`
 	AnomalousMorphology bool       `json:"anomalous_morphology"`
 	MarkedTDV           bool       `json:"marked_tdv"`
+	BadModelFit         bool       `json:"bad_model_fit"`
 	Notes               string     `json:"notes"`
 	Timestamp           *time.Time `json:"timestamp"`
 }
@@ -36,6 +37,7 @@ type ClassificationInput struct {
 	NormalTransit       bool     `json:"normal_transit"`
 	AnomalousMorphology bool     `json:"anomalous_morphology"`
 	MarkedTDV           bool     `json:"marked_tdv"`
+	BadModelFit         bool     `json:"bad_model_fit"`
 	Notes               string   `json:"notes"`
 }
 
@@ -47,14 +49,14 @@ func GetClassification(curveID int64, transitIndex int, userID int64) (*Classifi
 		SELECT id, curve_id, transit_index, user_id, t_expected_bjd, t_observed_bjd,
 		       ttv_minutes, left_asymmetry, right_asymmetry, increased_flux,
 		       decreased_flux, normal_transit, anomalous_morphology, marked_tdv,
-		       notes, timestamp
+		       bad_model_fit, notes, timestamp
 		FROM Classifications
 		WHERE curve_id = ? AND transit_index = ? AND user_id = ?
 	`, curveID, transitIndex, userID).Scan(
 		&c.ID, &c.CurveID, &c.TransitIndex, &c.UserID, &c.TExpectedBJD, &c.TObservedBJD,
 		&c.TTVMinutes, &c.LeftAsymmetry, &c.RightAsymmetry, &c.IncreasedFlux,
 		&c.DecreasedFlux, &c.NormalTransit, &c.AnomalousMorphology, &c.MarkedTDV,
-		&c.Notes, &timestamp,
+		&c.BadModelFit, &c.Notes, &timestamp,
 	)
 
 	if err == sql.ErrNoRows {
@@ -76,8 +78,9 @@ func SaveClassification(curveID int64, transitIndex int, userID int64, input Cla
 		INSERT INTO Classifications (
 			curve_id, transit_index, user_id, t_expected_bjd, t_observed_bjd, ttv_minutes,
 			left_asymmetry, right_asymmetry, increased_flux,
-			decreased_flux, normal_transit, anomalous_morphology, marked_tdv, notes
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			decreased_flux, normal_transit, anomalous_morphology, marked_tdv,
+			bad_model_fit, notes
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(curve_id, transit_index, user_id) DO UPDATE SET
 			t_expected_bjd = EXCLUDED.t_expected_bjd,
 			t_observed_bjd = EXCLUDED.t_observed_bjd,
@@ -89,12 +92,13 @@ func SaveClassification(curveID int64, transitIndex int, userID int64, input Cla
 			normal_transit = EXCLUDED.normal_transit,
 			anomalous_morphology = EXCLUDED.anomalous_morphology,
 			marked_tdv = EXCLUDED.marked_tdv,
+			bad_model_fit = EXCLUDED.bad_model_fit,
 			notes = EXCLUDED.notes,
 			timestamp = CURRENT_TIMESTAMP
 	`, curveID, transitIndex, userID, input.TExpectedBJD, input.TObservedBJD, input.TTVMinutes,
 		input.LeftAsymmetry, input.RightAsymmetry, input.IncreasedFlux,
 		input.DecreasedFlux, input.NormalTransit, input.AnomalousMorphology,
-		input.MarkedTDV, input.Notes)
+		input.MarkedTDV, input.BadModelFit, input.Notes)
 
 	return err
 }
@@ -154,6 +158,7 @@ type DetailedUserStats struct {
 	IncreasedFlux       int    `json:"increased_flux"`
 	DecreasedFlux       int    `json:"decreased_flux"`
 	MarkedTDV           int    `json:"marked_tdv"`
+	BadModelFit         int    `json:"bad_model_fit"`
 	WithNotes           int    `json:"with_notes"`
 	LastActivity        string `json:"last_activity,omitempty"`
 }
@@ -178,6 +183,7 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 			SUM(CASE WHEN increased_flux THEN 1 ELSE 0 END),
 			SUM(CASE WHEN decreased_flux THEN 1 ELSE 0 END),
 			SUM(CASE WHEN marked_tdv THEN 1 ELSE 0 END),
+			SUM(CASE WHEN bad_model_fit THEN 1 ELSE 0 END),
 			SUM(CASE WHEN notes != '' THEN 1 ELSE 0 END),
 			MAX(timestamp)
 		FROM Classifications WHERE user_id = ?
@@ -190,6 +196,7 @@ func GetDetailedUserStats(userID int64) (*DetailedUserStats, error) {
 		&stats.IncreasedFlux,
 		&stats.DecreasedFlux,
 		&stats.MarkedTDV,
+		&stats.BadModelFit,
 		&stats.WithNotes,
 		&stats.LastActivity,
 	)
@@ -230,6 +237,7 @@ type ClassificationExport struct {
 	IncreasedFlux       bool     `json:"increased_flux"`
 	DecreasedFlux       bool     `json:"decreased_flux"`
 	MarkedTDV           bool     `json:"marked_tdv"`
+	BadModelFit         bool     `json:"bad_model_fit"`
 	TExpectedBJD        *float64 `json:"t_expected_bjd"`
 	TObservedBJD        *float64 `json:"t_observed_bjd"`
 	TTVMinutes          *float64 `json:"ttv_minutes"`
@@ -249,6 +257,7 @@ func GetUserClassificationsForExport(userID int64) ([]ClassificationExport, erro
 			ct.increased_flux,
 			ct.decreased_flux,
 			ct.marked_tdv,
+			ct.bad_model_fit,
 			ct.t_expected_bjd,
 			ct.t_observed_bjd,
 			ct.ttv_minutes,
@@ -277,6 +286,7 @@ func GetUserClassificationsForExport(userID int64) ([]ClassificationExport, erro
 			&e.IncreasedFlux,
 			&e.DecreasedFlux,
 			&e.MarkedTDV,
+			&e.BadModelFit,
 			&e.TExpectedBJD,
 			&e.TObservedBJD,
 			&e.TTVMinutes,

@@ -167,6 +167,10 @@ export function UserDetail({ user }) {
                       <td class="text-right font-mono">{stats.marked_tdv}</td>
                     </tr>
                     <tr>
+                      <td>{t('classification.badModelFit')}</td>
+                      <td class="text-right font-mono">{stats.bad_model_fit}</td>
+                    </tr>
+                    <tr>
                       <td>{t('userDetail.hasNotes')}</td>
                       <td class="text-right font-mono">{stats.with_notes}</td>
                     </tr>

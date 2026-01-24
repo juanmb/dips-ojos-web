@@ -137,7 +137,7 @@ func ExportUserClassifications(c *gin.Context) {
 		"normal_transit", "anomalous_morphology",
 		"left_asymmetry", "right_asymmetry",
 		"increased_flux", "decreased_flux",
-		"marked_tdv",
+		"marked_tdv", "bad_model_fit",
 		"t_expected_bjd", "t_observed_bjd", "ttv_minutes",
 		"notes", "timestamp",
 	}
@@ -155,6 +155,7 @@ func ExportUserClassifications(c *gin.Context) {
 			boolToStr(cl.IncreasedFlux),
 			boolToStr(cl.DecreasedFlux),
 			boolToStr(cl.MarkedTDV),
+			boolToStr(cl.BadModelFit),
 			floatPtrToStr(cl.TExpectedBJD),
 			floatPtrToStr(cl.TObservedBJD),
 			floatPtrToStr(cl.TTVMinutes),

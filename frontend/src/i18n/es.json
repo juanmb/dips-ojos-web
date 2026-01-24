@@ -81,6 +81,7 @@
     "interiorFluxIncrease": "Aumento Flujo Interior",
     "interiorFluxDecrease": "Disminución Flujo Interior",
     "markedTdv": "TDV Marcada",
+    "badModelFit": "Mal Ajuste del Modelo",
     "deleteAll": "Eliminar Clasificaciones",
     "deleteAllTitle": "Eliminar Todas las Clasificaciones",
     "deleteWarning": "¡Esta acción no se puede deshacer!",

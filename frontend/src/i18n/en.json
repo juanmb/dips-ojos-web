@@ -81,6 +81,7 @@
     "interiorFluxIncrease": "Interior Flux Increase",
     "interiorFluxDecrease": "Interior Flux Decrease",
     "markedTdv": "Marked TDV",
+    "badModelFit": "Bad Model Fit",
     "deleteAll": "Delete All Classifications",
     "deleteAllTitle": "Delete All Classifications",
     "deleteWarning": "This action cannot be undone!",
