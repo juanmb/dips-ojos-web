@@ -148,7 +148,13 @@ export function TransitViewer({ curve, onClassificationSaved, onNextCurve, onPre
                 class="max-w-full max-h-full object-contain dark-invert"
               />
             ) : (
-              <div class="text-base-content/50">{t('transit.noImage')}</div>
+              <div class="text-center text-base-content/50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                <p class="font-medium">{t('transit.noImage')}</p>
+                <p class="text-sm mt-1 opacity-70">{t('transit.noImageReason')}</p>
+              </div>
             )}
           </div>
         </div>
