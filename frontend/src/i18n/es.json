@@ -109,7 +109,8 @@
     "fullName": "Nombre completo",
     "administrator": "Administrador",
     "userNotFound": "Usuario no encontrado",
-    "backToAdmin": "Volver a admin"
+    "backToAdmin": "Volver a admin",
+    "downloadDb": "Descargar BD"
   },
   "userDetail": {
     "exportCsv": "Exportar CSV",

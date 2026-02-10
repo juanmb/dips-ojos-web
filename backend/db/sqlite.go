@@ -16,8 +16,10 @@ import (
 var migrationsFS embed.FS
 
 var DB *sql.DB
+var DBPath string
 
 func Connect(dbPath string) error {
+	DBPath = dbPath
 	var err error
 	DB, err = sql.Open("sqlite3", dbPath+"?_foreign_keys=on")
 	if err != nil {

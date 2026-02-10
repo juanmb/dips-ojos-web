@@ -113,6 +113,7 @@ func main() {
 			admin.DELETE("/users/:id", handlers.DeleteUser)
 			admin.GET("/users/:id/stats", handlers.GetUserStats)
 			admin.GET("/users/:id/export", handlers.ExportUserClassifications)
+			admin.GET("/db/download", handlers.DownloadDatabase)
 		}
 	}
 

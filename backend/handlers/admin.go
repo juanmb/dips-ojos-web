@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"emoons-web/db"
 	"emoons-web/models"
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -164,6 +167,28 @@ func ExportUserClassifications(c *gin.Context) {
 		}
 		writer.Write(row)
 	}
+}
+
+func DownloadDatabase(c *gin.Context) {
+	tmpFile, err := os.CreateTemp("", "db-backup-*.sqlite")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create temp file"})
+		return
+	}
+	tmpPath := tmpFile.Name()
+	tmpFile.Close()
+	defer os.Remove(tmpPath)
+
+	if _, err := db.DB.Exec("VACUUM INTO ?", tmpPath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create database backup"})
+		return
+	}
+
+	timestamp := time.Now().UTC().Format("20060102_150405")
+	filename := fmt.Sprintf("transit_analysis_%s.db", timestamp)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Type", "application/x-sqlite3")
+	c.File(tmpPath)
 }
 
 func boolToStr(b bool) string {

@@ -118,5 +118,27 @@ export const api = {
         window.URL.revokeObjectURL(url)
         a.remove()
       })
+  },
+
+  downloadDatabase: () => {
+    const headers = { 'Authorization': `Bearer ${token.value}` }
+    return fetch(`${API_BASE}/admin/db/download`, { headers })
+      .then(res => {
+        if (!res.ok) throw new Error('Download failed')
+        const disposition = res.headers.get('Content-Disposition')
+        const match = disposition && disposition.match(/filename=(.+)/)
+        const filename = match ? match[1] : 'transit_analysis.db'
+        return res.blob().then(blob => ({ blob, filename }))
+      })
+      .then(({ blob, filename }) => {
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+      })
   }
 }

@@ -4,6 +4,7 @@ import { t } from '../i18n/index.js'
 import { CreateUserModal } from './modals/CreateUserModal.jsx'
 import { EditUserModal } from './modals/EditUserModal.jsx'
 import { DeleteConfirmModal } from './modals/DeleteConfirmModal.jsx'
+import { DownloadDatabaseButton } from './DownloadDatabaseButton.jsx'
 
 export function AdminPanel() {
   const [users, setUsers] = useState([])
@@ -106,9 +107,12 @@ export function AdminPanel() {
     <div class="p-4 h-full overflow-auto">
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">{t('admin.title')}</h1>
-        <button class="btn btn-primary btn-sm" onClick={() => setShowCreateForm(true)}>
-          {t('admin.newUser')}
-        </button>
+        <div class="flex gap-2">
+          <DownloadDatabaseButton onError={setError} />
+          <button class="btn btn-primary btn-sm" onClick={() => setShowCreateForm(true)}>
+            {t('admin.newUser')}
+          </button>
+        </div>
       </div>
 
       {error && (
