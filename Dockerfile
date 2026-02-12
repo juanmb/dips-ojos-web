@@ -30,17 +30,17 @@ COPY --from=backend-builder /app/db/migrations ./db/migrations
 COPY --from=frontend-builder /app/dist ./frontend/dist
 
 # Create data directories
-RUN mkdir -p /plots /db
+RUN mkdir -p /data/plots /data/db
 
-# Environment variables
-ENV DATABASE_PATH=/db/transit_analysis.db
-ENV TRANSITS_CSV_PATH=/plots/transits.csv
-ENV CURVES_CSV_PATH=/plots/curves.csv
-ENV PLOTS_DIR=/plots
+# Environment variables (Railway volumes use /data/storage/ subdirectory)
+ENV DATABASE_PATH=/data/storage/db/transit_analysis.db
+ENV TRANSITS_CSV_PATH=/data/storage/plots/transits.csv
+ENV CURVES_CSV_PATH=/data/storage/plots/curves.csv
+ENV PLOTS_DIR=/data/storage/plots
 ENV FRONTEND_DIR=/app/frontend/dist
 ENV PORT=8080
 ENV GIN_MODE=release
 
 EXPOSE 8080
 
-CMD ["./emoons-web"]
+CMD ["sh", "-c", "mkdir -p /data/storage/plots /data/storage/db && ./emoons-web"]

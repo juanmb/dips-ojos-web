@@ -75,6 +75,11 @@ func main() {
 	// Serve static plot images
 	r.Static("/plots", plotsDir)
 
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
 	// Public routes
 	r.POST("/api/auth/login", handlers.Login)
 
