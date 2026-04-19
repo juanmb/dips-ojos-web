@@ -11,6 +11,7 @@ import { AdminPanel } from './components/AdminPanel.jsx'
 import { UserDetail } from './components/UserDetail.jsx'
 import { Navbar } from './components/layout/Navbar.jsx'
 import { HelpDialog } from './components/layout/HelpDialog.jsx'
+import { ShortcutsDialog } from './components/layout/ShortcutsDialog.jsx'
 
 function MainView({ curves, selectedCurve, setSelectedCurve, refreshKey, onClassificationSaved, navigateCurve }) {
   return (
@@ -106,6 +107,7 @@ export function App() {
   const [selectedCurve, setSelectedCurve] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showHelp, setShowHelp] = useState(false)
+  const [showShortcuts, setShowShortcuts] = useState(false)
   const [currentPath, setCurrentPath] = useState('/')
 
   useEffect(() => {
@@ -170,15 +172,18 @@ export function App() {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'TEXTAREA') return
       if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') return
-      if (e.key === '?' || e.key === 'h') {
+      if (e.key === '?') {
+        setShowShortcuts(s => !s)
+      } else if (e.key === 'h') {
         setShowHelp(s => !s)
-      } else if (e.key === 'Escape' && showHelp) {
-        setShowHelp(false)
+      } else if (e.key === 'Escape') {
+        if (showShortcuts) setShowShortcuts(false)
+        if (showHelp) setShowHelp(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showHelp])
+  }, [showHelp, showShortcuts])
 
   const isAdminRoute = currentPath.startsWith('/admin')
 
@@ -188,6 +193,7 @@ export function App() {
         isAdminRoute={isAdminRoute}
         onLogout={handleLogout}
         onShowHelp={() => setShowHelp(true)}
+        onShowShortcuts={() => setShowShortcuts(true)}
       />
 
       <Router onChange={handleRouteChange}>
@@ -205,6 +211,7 @@ export function App() {
       </Router>
 
       <HelpDialog show={showHelp} onClose={() => setShowHelp(false)} />
+      <ShortcutsDialog show={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   )
 }

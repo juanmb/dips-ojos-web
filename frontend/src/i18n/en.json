@@ -20,13 +20,21 @@
     "passwordPlaceholder": "Enter password",
     "submit": "Login",
     "submitting": "Logging in...",
-    "failed": "Login failed"
+    "failed": "Login failed",
+    "aboutLink": "About this project"
   },
   "navbar": {
     "classifier": "Classifier",
     "admin": "Admin",
     "logout": "Logout",
-    "help": "Keyboard shortcuts (?)"
+    "help": "Help & documentation (H)",
+    "shortcuts": "Keyboard shortcuts (?)"
+  },
+  "docs": {
+    "aboutTitle": "About the project",
+    "tutorialTitle": "Tutorial",
+    "examplesTitle": "Examples",
+    "helpDialogTitle": "Help & documentation"
   },
   "help": {
     "title": "Keyboard Shortcuts",
@@ -37,6 +45,7 @@
     "prevCurve": "Previous curve",
     "nextCurve": "Next curve",
     "general": "General",
+    "toggleShortcuts": "Toggle shortcuts",
     "toggleHelp": "Toggle help",
     "closeDialog": "Close dialog"
   },

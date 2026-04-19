@@ -20,13 +20,21 @@
     "passwordPlaceholder": "Introduce contraseña",
     "submit": "Entrar",
     "submitting": "Entrando...",
-    "failed": "Error de autenticación"
+    "failed": "Error de autenticación",
+    "aboutLink": "Sobre el proyecto"
   },
   "navbar": {
     "classifier": "Clasificador",
     "admin": "Admin",
     "logout": "Cerrar sesión",
-    "help": "Atajos de teclado (?)"
+    "help": "Ayuda y documentación (H)",
+    "shortcuts": "Atajos de teclado (?)"
+  },
+  "docs": {
+    "aboutTitle": "Sobre el proyecto",
+    "tutorialTitle": "Tutorial",
+    "examplesTitle": "Ejemplos",
+    "helpDialogTitle": "Ayuda y documentación"
   },
   "help": {
     "title": "Atajos de teclado",
@@ -37,6 +45,7 @@
     "prevCurve": "Curva anterior",
     "nextCurve": "Curva siguiente",
     "general": "General",
+    "toggleShortcuts": "Mostrar/ocultar atajos",
     "toggleHelp": "Mostrar/ocultar ayuda",
     "closeDialog": "Cerrar diálogo"
   },

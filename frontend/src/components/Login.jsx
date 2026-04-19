@@ -2,12 +2,14 @@ import { useState } from "preact/hooks";
 import { api } from "../api/client.js";
 import { setAuth } from "../stores/auth.js";
 import { t, language, setLanguage } from "../i18n/index.js";
+import { AboutDialog } from "./layout/AboutDialog.jsx";
 
 export function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,8 +113,23 @@ export function Login() {
               </button>
             </div>
           </form>
+
+          <div class="text-center mt-4">
+            <button
+              type="button"
+              class="btn btn-sm btn-outline btn-primary gap-2"
+              onClick={() => setShowAbout(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {t('login.aboutLink')}
+            </button>
+          </div>
         </div>
       </div>
+
+      <AboutDialog show={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }

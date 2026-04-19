@@ -1,44 +1,48 @@
+import { useState, useEffect } from 'preact/hooks'
 import { t } from '../../i18n/index.js'
+import { DocView } from '../docs/DocView.jsx'
+
+const TABS = [
+  { id: 'about', labelKey: 'docs.aboutTitle' },
+  { id: 'tutorial', labelKey: 'docs.tutorialTitle' },
+  { id: 'examples', labelKey: 'docs.examplesTitle' },
+]
 
 export function HelpDialog({ show, onClose }) {
+  const [activeTab, setActiveTab] = useState('about')
+
+  useEffect(() => {
+    if (show) setActiveTab('about')
+  }, [show])
+
   return (
     <dialog class={`modal ${show ? 'modal-open' : ''}`}>
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">{t('help.title')}</h3>
-
-        <div class="space-y-4">
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">{t('help.transitNav')}</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">←</kbd> or <kbd class="kbd kbd-sm">A</kbd></div>
-              <div>{t('help.prevTransit')}</div>
-              <div><kbd class="kbd kbd-sm">→</kbd> or <kbd class="kbd kbd-sm">D</kbd></div>
-              <div>{t('help.nextTransit')}</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">{t('help.curveNav')}</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">↑</kbd> or <kbd class="kbd kbd-sm">W</kbd></div>
-              <div>{t('help.prevCurve')}</div>
-              <div><kbd class="kbd kbd-sm">↓</kbd> or <kbd class="kbd kbd-sm">S</kbd></div>
-              <div>{t('help.nextCurve')}</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-sm opacity-70 mb-2">{t('help.general')}</h4>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><kbd class="kbd kbd-sm">?</kbd> or <kbd class="kbd kbd-sm">H</kbd></div>
-              <div>{t('help.toggleHelp')}</div>
-              <div><kbd class="kbd kbd-sm">Esc</kbd></div>
-              <div>{t('help.closeDialog')}</div>
-            </div>
-          </div>
+      <div class="modal-box max-w-4xl max-h-[85vh] flex flex-col">
+        <div class="flex-none flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg">{t('docs.helpDialogTitle')}</h3>
+          <button class="btn btn-sm btn-circle btn-ghost" onClick={onClose} aria-label={t('common.close')}>✕</button>
         </div>
 
-        <div class="modal-action">
+        <div role="tablist" class="flex-none tabs tabs-bordered mb-4">
+          {TABS.map(tab => (
+            <a
+              key={tab.id}
+              role="tab"
+              class={`tab ${activeTab === tab.id ? 'tab-active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {t(tab.labelKey)}
+            </a>
+          ))}
+        </div>
+
+        <div class="flex-1 min-h-0 overflow-y-auto pr-2">
+          {activeTab === 'about' && <DocView slug="about" />}
+          {activeTab === 'tutorial' && <DocView slug="tutorial" />}
+          {activeTab === 'examples' && <DocView slug="examples" />}
+        </div>
+
+        <div class="flex-none modal-action">
           <button class="btn btn-sm" onClick={onClose}>{t('common.close')}</button>
         </div>
       </div>

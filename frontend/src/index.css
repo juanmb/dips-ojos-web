@@ -15,3 +15,33 @@ body {
   filter: invert(1) hue-rotate(180deg);
   mix-blend-mode: lighten;
 }
+
+/* Center images in rendered markdown (prose), except those explicitly marked inline */
+.prose img:not(.inline) {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Image captions (auto-wrapped as <figure>/<figcaption>) centered under the image */
+.prose figure {
+  text-align: center;
+}
+.prose figcaption {
+  margin-top: 0.5em;
+}
+
+/* Horizontal row of logos (used in About page) */
+.prose .logos-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+.prose .logos-row img {
+  display: inline-block;
+  max-height: 10rem;
+  width: auto;
+  margin: 0;
+}
