@@ -43,10 +43,23 @@ def setup_logging(verbose: bool) -> None:
     help="Process specific file(s) only. Can be specified multiple times.",
 )
 @click.option(
+    "--files-from",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Text file with a list of CSV filenames to process (one per line).",
+)
+@click.option(
+    "-F",
+    "--format",
+    "output_format",
+    type=click.Choice(["png", "pdf", "eps", "svg"], case_sensitive=False),
+    default="png",
+    help="Output format for plots.",
+)
+@click.option(
     "--dpi",
     type=int,
     default=150,
-    help="Plot resolution in DPI.",
+    help="Plot resolution in DPI (for raster formats).",
 )
 @click.option(
     "--skip-fitting",
@@ -73,6 +86,8 @@ def main(
     input_dir: Path,
     output_dir: Path,
     files: tuple[str, ...],
+    files_from: Path | None,
+    output_format: str,
     dpi: int,
     skip_fitting: bool,
     force: bool,
@@ -81,8 +96,9 @@ def main(
 ) -> None:
     """Generate transit light curve plots from CSV data files.
 
-    Processes all CSV files in the input directory (or specific files if -f is used),
-    generates PNG plots for each transit, and creates a summary CSV with transit data.
+    Processes all CSV files in the input directory (or a subset selected via
+    -f / --files-from), generates plots for each transit, and creates a
+    summary CSV with transit data.
 
     Examples:
 
@@ -92,6 +108,9 @@ def main(
         # Process specific file with verbose output
         uv run python generate_plots.py -f Corot1b.csv -v
 
+        # Process files listed in a text file, as vector EPS output
+        uv run python generate_plots.py --files-from my_list.txt -F eps
+
         # Dry run to see which files would be processed
         uv run python generate_plots.py --dry-run
 
@@ -99,18 +118,25 @@ def main(
         uv run python generate_plots.py -i my_data -o my_plots --dpi 300
     """
     setup_logging(verbose)
-    logger = logging.getLogger(__name__)
+
+    selected_files: list[str] = list(files)
+    if files_from is not None:
+        extra = [
+            line.strip()
+            for line in files_from.read_text().splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
+        selected_files.extend(extra)
 
     if dry_run:
         click.echo(f"Files that would be processed from {input_dir}:")
 
-    file_list = list(files) if files else None
-
     records = generate_all(
         data_dir=input_dir,
         output_dir=output_dir,
-        files=file_list,
+        files=selected_files or None,
         dpi=dpi,
+        output_format=output_format.lower(),
         skip_fitting=skip_fitting,
         dry_run=dry_run,
         force=force,

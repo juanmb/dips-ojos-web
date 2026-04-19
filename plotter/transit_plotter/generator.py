@@ -201,6 +201,7 @@ def process_file(
     filepath: Path,
     output_dir: Path,
     dpi: int = 150,
+    output_format: str = "png",
     skip_fitting: bool = False,
     force: bool = False,
 ) -> tuple[list[TransitRecord], LightCurveRecord | None]:
@@ -209,8 +210,9 @@ def process_file(
 
     Args:
         filepath: Path to the input CSV file.
-        output_dir: Directory for output PNG files.
-        dpi: Plot resolution.
+        output_dir: Directory for output plot files.
+        dpi: Plot resolution (raster formats).
+        output_format: File extension for plots (e.g. "png", "pdf", "eps", "svg").
         skip_fitting: If True, skip model fitting and only plot data.
         force: If True, regenerate plots even if they already exist.
 
@@ -268,7 +270,7 @@ def process_file(
     skipped_failed = []
     for i, t0 in enumerate(expected_t0s):
         transit_num = i + 1
-        plot_path = output_dir / f"{basename}_transit_{transit_num:03d}.png"
+        plot_path = output_dir / f"{basename}_transit_{transit_num:03d}.{output_format}"
 
         if not force:
             if plot_path.exists():
@@ -391,6 +393,7 @@ def generate_all(
     output_dir: Path,
     files: list[str] | None = None,
     dpi: int = 150,
+    output_format: str = "png",
     skip_fitting: bool = False,
     dry_run: bool = False,
     force: bool = False,
@@ -402,7 +405,8 @@ def generate_all(
         data_dir: Directory containing input CSV files.
         output_dir: Directory for output files.
         files: Optional list of specific filenames to process.
-        dpi: Plot resolution.
+        dpi: Plot resolution (raster formats).
+        output_format: File extension for plots (e.g. "png", "pdf", "eps", "svg").
         skip_fitting: If True, skip model fitting.
         dry_run: If True, only list files without processing.
         force: If True, regenerate plots even if they already exist.
@@ -437,7 +441,12 @@ def generate_all(
     for filepath in csv_files:
         try:
             transit_records, curve_record = process_file(
-                filepath, output_dir, dpi=dpi, skip_fitting=skip_fitting, force=force
+                filepath,
+                output_dir,
+                dpi=dpi,
+                output_format=output_format,
+                skip_fitting=skip_fitting,
+                force=force,
             )
             all_transit_records.extend(transit_records)
             if curve_record is not None:
