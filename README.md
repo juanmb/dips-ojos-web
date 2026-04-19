@@ -71,8 +71,9 @@ ADMIN_PASSWORD=your-secure-password
 # Required: JWT secret (use a random string in production)
 JWT_SECRET=your-secret-key
 
-# Required for Traefik: Hostname for SSL certificates
-HOSTNAME=your-domain.com
+# Optional: kept for compatibility, but Traefik in compose.yaml
+# is configured to accept both emoons.twave.link and dipsojos.uniovi.es
+HOSTNAME=emoons.twave.link
 ```
 
 ### Build and Run
