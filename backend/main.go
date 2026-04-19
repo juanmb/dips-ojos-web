@@ -125,6 +125,7 @@ func main() {
 	// Serve frontend static files (for production)
 	if frontendDir != "" {
 		r.Static("/assets", frontendDir+"/assets")
+		r.Static("/docs", frontendDir+"/docs")
 		r.StaticFile("/favicon.ico", frontendDir+"/favicon.ico")
 		r.StaticFile("/logo.jpg", frontendDir+"/logo.jpg")
 		r.StaticFile("/login-bg.png", frontendDir+"/login-bg.png")
@@ -132,7 +133,7 @@ func main() {
 		// SPA fallback: serve index.html for non-API, non-static routes
 		r.NoRoute(func(c *gin.Context) {
 			path := c.Request.URL.Path
-			if !strings.HasPrefix(path, "/api/") && !strings.HasPrefix(path, "/plots/") {
+			if !strings.HasPrefix(path, "/api/") && !strings.HasPrefix(path, "/plots/") && !strings.HasPrefix(path, "/docs/") {
 				c.File(frontendDir + "/index.html")
 				return
 			}
