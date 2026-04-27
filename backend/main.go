@@ -129,6 +129,9 @@ func main() {
 		r.StaticFile("/favicon.ico", frontendDir+"/favicon.ico")
 		r.StaticFile("/logo.jpg", frontendDir+"/logo.jpg")
 		r.StaticFile("/login-bg.png", frontendDir+"/login-bg.png")
+		r.StaticFile("/logo_uniovi.png", frontendDir+"/logo_uniovi.png")
+		r.StaticFile("/logo_ictea.png", frontendDir+"/logo_ictea.png")
+		r.StaticFile("/logo_omega.png", frontendDir+"/logo_omega.png")
 
 		// SPA fallback: serve index.html for non-API, non-static routes
 		r.NoRoute(func(c *gin.Context) {
