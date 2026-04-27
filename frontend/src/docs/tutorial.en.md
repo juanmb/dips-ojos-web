@@ -1,75 +1,61 @@
-# Emoons–OjOs Tutorial
+# DIPS – OjOs Tutorial
 
-*Emoons-OjOs* is a project aimed at reviewing light curves of stars with exoplanet transits to inspect and classify all transits present in them. The objective is to detect certain features that may be present in these transits, such as occlusions of starspots as exoplanets transit across the stellar disk or possible signatures originating from exomoons.
+*DIPS-OjOS* (Detecting Irregular Photometric Signals OJimetrO Survey) is a project aimed at reviewing light curves of stars with exoplanet transits to inspect and classify all transits present in them. The objective is to detect certain subtle anomalies that may be present in these transits and could reveal starspot crossing events, stellar flares, the presence of rings, dust, transit duration variations, or the presence of additional bodies such as exomoons.
 
-We start by validating ourselves on the project website ([https://emoons.twave.link/](https://emoons.twave.link/) as of 25/08/2025) with our username and password and click *Sign In*:
+We start by logging into the project's website [http://dipsojos.uniovi.es](http://dipsojos.uniovi.es) with our username and password and click *Enter* (you can access test mode with the username *public* and the password *public*).
 
-![](/docs/tutorial/1.png)
+![](/docs/tutorial/en/1.png)
 
-Once inside the application, we click on *Select a curve* and a dropdown list will appear with all the curves we can inspect:
+Once inside the application, on the left panel, we will see the curves available for classification (All). We can also see all the curves pending classification (Pending) and those we have already finished classifying (Done). Next to each curve's identifier (Curve #), a progress bar is displayed indicating the classification status of each curve, as well as the number of classified transits / total transits for each curve.
 
-![](/docs/tutorial/2.png)
+![](/docs/tutorial/en/2.png)
 
-In this dropdown list, curves accompanied by the icon *![](/docs/tutorial/3.png)* are those we have never inspected. Those accompanied by the icon ![](/docs/tutorial/4.png) are those we have already started to inspect but have not finished classifying all their transits. Finally, those accompanied by the icon *![](/docs/tutorial/5.png)*, are those in which we have already classified all their transits. Although we have already classified the transits of a curve, we can review them again and make changes to the classification. These changes are updated in the database.
+The curves can be real or simulated, so we will inspect them in blind mode, without knowing what type of curve we are working with. The simulated curves represent exoplanet transits with realistic physical parameters, with or without satellites, transiting stars with and without spots, with a variety of radii for the star, the planet, and possible satellites, with transit timing variations (TTVs), with different periods and orbital semi-major axes... Analyzing simulated curves will help us quantify the efficiency of the work by generating more or fewer false positives and by recovering or missing certain signals that we know are present in the simulated curves.
 
-The curves can be real or simulated, so we will inspect them without knowing what type of curve we are working with. Simulated curves represent exoplanet transits that could really exist, with or without satellites, transiting stars with and without starspots, with varieties of radii (star, planet, satellite), with variations in transit times (TTVs), with different periods and orbital semi-major axes... Analyzing simulated curves will help us quantify afterwards the efficiency of our work when recovering or not certain signals that we know are present in the simulated curves.
+In the central part of the tool, the main figure is presented. It is a flux versus time graph (in days) composed of the real points of the curve (white dots) and the theoretical fit model (red curve) calculated by the code, which best fits globally to all the transits of the curve. The deviations of the points from the theoretical model reflect possible phenomena that could be taking place, which are precisely what we want to detect and study.
 
-When we select a curve, a figure will appear showing the first transit of the curve, or if we have already worked previously with that curve, we will be presented with the transit following the last one we classified.
+Above the curve, the transit timing variation (TTV) obtained by the model is indicated. The transit should occur at a certain theoretical moment in time that the code calculates from the central time officially tabulated for the first transit of that exoplanet and its orbital period. However, when the code fits the model to each transit, it obtains a central time for each transit. The difference is what is known as TTV and can be the result of noise present in the transit, the effect of starspots, or actually be due to the influence of other planets or even the presence of exomoons.
 
-![](/docs/tutorial/6.png)
+Below the transit figure, we have the residuals figure. This represents how much each real point deviates from the model, and it can provide us with information even more clearly than the transit figure.
 
-Above the figure we will see buttons "Previous" and "Next" that allow us to move through each of the transits of the curve.
+![](/docs/tutorial/en/3.png)
 
-The main figure is a flux versus time graph (in days) composed of the real data points of the curve (black dots) and the theoretical fit model (red curve) calculated by the code and that best fits all the transits of the curve globally. Deviations of the black dots from the theoretical model reflect possible phenomena that could be taking place and that are precisely what we want to study.
+On the right side of the application, another panel is presented with certain parameters for the transits of that exoplanet (both theoretical and those fitted by the model). Furthermore, we can navigate through the different transits of the light curve using the < (previous) and > (next) buttons.
 
-Above the curve appears the variation in transit time (TTV, Transit Timing Variation) that the model computes for that transit. The transit should occur at a certain theoretical time that the code calculates from the centrally timed officially tabulated time for the first transit of that exoplanet (the *t0*) and its orbital period. Now, when the code fits the model (red line) to each transit, it obtains a calculated central time for each transit. The difference between tc_teórico and tc_calculado is what is known as TTV and may be the result of the influence of other planets, because the orbit is very eccentric or even by the presence of exomoons.
+![](/docs/tutorial/en/4.png)
 
-Below the transit figure we have the figure of the residuals. This figure represents how much each real point deviates from the model, and can give us information even more clearly than the transit figure.
+On the right, we also have the different checkboxes that allow us to classify each of the transits, as well as a text box where we can write notes. We must inspect in detail the central figure that presents the data for each transit along with the model, as well as the residuals figure. If we detect any anomaly, we must report it by checking the corresponding checkbox (we can check multiple checkboxes in the same transit). Once checked, when we move to another transit, what we have marked will be automatically saved in the database. If we inspect the same transit again and change the classification, this will be automatically refreshed in the database, and if we click the *Delete classifications* button, we will erase all the classifications we have made for the transits of the curve we are studying.
 
-![](/docs/tutorial/7.png)![](/docs/tutorial/8.png)
+![](/docs/tutorial/en/5.png)
 
-In this example, clear deviations can be seen in the residuals both at the entry and exit of the transit. Also in the central zone the residuals are consistently below the zero value, which corresponds to the model. This means that the flux within the transit is lower than the model.
+Classification Examples:
 
-In this example, you can see how the points are distributed uniformly around the model. The dispersion is due to noise, no clear deviations are apparent.
+**Normal Morphology:** the observed points are uniformly distributed around the model. The deviations are uniform and are due to noise.
 
-![](/docs/tutorial/9.png)
+![](/docs/tutorial/en/6.png)
 
-Below the residual figure, we find information relating to the planetary radius and orbital semi-major axis (both in units of stellar radius: *Rp/R\** and *ap/R\**) theoretical that the code reads from each data file along with these same parameters that the code adjusts to obtain the model that best represents all the transits of the curve.
+**Anomalous Morphology:** we will check this box if we detect any structure in the transit that does not fit into any of the other categories. Comments can be made in the **Notes** box to complete the inspection of any transit.
 
-On the right we have the different checkboxes that allow us to classify each of the transits. We must inspect in detail the figure that presents the transit data along with the model, as well as the residuals figure. If we detect any irregularity we must report it by checking the corresponding checkbox. Once marked, when we click the "Next" button to inspect the next transit, what we have marked will be automatically saved to the database.
+![](/docs/tutorial/en/7.png)
 
-Classification examples:
+**Left / Right Asymmetry:** if we notice that there is a clear deviation at the entrance / exit of the transit.
 
-**Normal Morphology**: the points are distributed uniformly around the model. The deviations are uniform and are due to noise. ![](/docs/tutorial/10.png)
+![](/docs/tutorial/en/8.png)
 
-**Anomalous Morphology:** we will check this box if we detect any structure in the transit that does not fit into any of the other categories. Comments can be made in the **Notes** box that complement the inspection of any transit.
+![](/docs/tutorial/en/9.png)
 
-![](/docs/tutorial/11.png)
+**Interior flux increase:** if we notice a clear flux increase in the central region of the transit.
 
-**Left / Right Asymmetry**: if we notice that at the entry / exit of the transit there is a clear deviation.
+![](/docs/tutorial/en/10.png)
 
-![](/docs/tutorial/12.png)
+**Interior flux decrease:** if we notice a clear flux decrease in the central region of the transit.
 
-**Interior Flux Increase**: if we notice a clear increase in flux in the central region of the transit. This could be caused by the planet passing in front of a starspot on the host star or by mutual phenomena with a possible satellite.
+![](/docs/tutorial/en/11.png)
 
-![](/docs/tutorial/13.png)
+**Marked TDV:** we will check this box (Transit Duration Variation) if we clearly notice that the transit duration is longer or shorter than that of the theoretical model.
 
-**Interior Flux Decrease**: if we detect that the flux in the central zone of the transit is clearly below the model. This could be caused by the extra contribution of a possible satellite and therefore the code cannot model it correctly.
+![](/docs/tutorial/en/12.png)
 
-![](/docs/tutorial/14.png)
+**Bad model fit:** we will check this box if the model has clearly failed to fit the observed transit.
 
-**Marked TDV**: we will check this box (Transit Duration Variation) if we clearly notice that the duration of the transit is greater or less than that of the theoretical model.
-
-This can originate if the planet shows marked TTVs or from geometric and/or gravitational effects caused by a possible satellite.
-
-![](/docs/tutorial/15.png)
-
-Of course, in the same transit we can mark more than one feature if we detect more than one present:
-
-![](/docs/tutorial/16.png)
-
-Finally, if on the left we click the button ![](/docs/tutorial/17.png) we can review all the curves there are and our review status:
-
-![](/docs/tutorial/18.png)
-
-To review curves again we will first click the button ![](/docs/tutorial/19.png) and then select the curve we want to review.
+![](/docs/tutorial/en/13.png)
