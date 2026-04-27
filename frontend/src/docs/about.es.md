@@ -52,12 +52,12 @@ Se ha habilitado un acceso público (en modo de prueba) a la herramienta de clas
 
 <div class="logos-row">
   <a href="https://www.uniovi.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/5.png" alt="Universidad de Oviedo" />
+    <img src="/logo_uniovi.png" alt="Universidad de Oviedo" style="width: 200px;" />
   </a>
   <a href="https://ictea.uniovi.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/6.png" alt="Instituto Universitario de Ciencias y Tecnologías del Espacio de Asturias" />
+    <img src="/logo_ictea.png" alt="Instituto Universitario de Ciencias y Tecnologías del Espacio de Asturias" style="width: 200px;" />
   </a>
   <a href="https://saaomega.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/7.png" alt="Sociedad Astronómica Asturiana Omega" />
+    <img src="/logo_omega.png" alt="Sociedad Astronómica Asturiana Omega" style="width: 300px;" />
   </a>
 </div>

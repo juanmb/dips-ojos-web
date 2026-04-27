@@ -28,7 +28,7 @@ export function Login() {
 
   return (
     <div
-      class="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      class="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat py-8"
       style="background-image: url('/login-bg.png');"
     >
       <div class="card w-96 bg-base-100/80 backdrop-blur-sm shadow-xl">
@@ -130,6 +130,18 @@ export function Login() {
       </div>
 
       <AboutDialog show={showAbout} onClose={() => setShowAbout(false)} />
+
+      <div class="mt-8 flex items-center justify-center gap-10">
+        <a href="https://www.uniovi.es/" target="_blank" rel="noopener noreferrer">
+          <img src="/logo_uniovi.png" alt="Universidad de Oviedo" class="w-[160px] h-auto opacity-90 hover:opacity-100 transition-opacity" />
+        </a>
+        <a href="https://ictea.uniovi.es/" target="_blank" rel="noopener noreferrer">
+          <img src="/logo_ictea.png" alt="ICTEA" class="w-[160px] h-auto opacity-90 hover:opacity-100 transition-opacity" />
+        </a>
+        <a href="https://saaomega.es/" target="_blank" rel="noopener noreferrer">
+          <img src="/logo_omega.png" alt="SAA Omega" class="w-[240px] h-auto opacity-90 hover:opacity-100 transition-opacity" />
+        </a>
+      </div>
     </div>
   );
 }

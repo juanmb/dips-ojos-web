@@ -51,12 +51,12 @@ Public access (in test mode) has been enabled for the classification tool. You c
 
 <div class="logos-row">
   <a href="https://www.uniovi.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/5.png" alt="Universidad de Oviedo" />
+    <img src="/logo_uniovi.png" alt="Universidad de Oviedo" style="width: 200px;" />
   </a>
   <a href="https://ictea.uniovi.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/6.png" alt="University Institute of Space Sciences and Technologies of Asturias" />
+    <img src="/logo_ictea.png" alt="University Institute of Space Sciences and Technologies of Asturias" style="width: 200px;" />
   </a>
   <a href="https://saaomega.es/" target="_blank" rel="noopener noreferrer">
-    <img src="/docs/about/7.png" alt="Asturian Astronomical Society Omega" />
+    <img src="/logo_omega.png" alt="Asturian Astronomical Society Omega" style="width: 300px;" />
   </a>
 </div>
