@@ -34,7 +34,13 @@
     "aboutTitle": "Sobre el proyecto",
     "tutorialTitle": "Tutorial",
     "examplesTitle": "Ejemplos",
+    "downloadsTitle": "Descargas",
     "helpDialogTitle": "Ayuda y documentación"
+  },
+  "downloads": {
+    "curvesTitle": "Curvas de luz DIPS-OJOS",
+    "curvesDescription": "Archivo ZIP con todas las curvas de luz utilizadas en el proyecto, en formato CSV. Tamaño aproximado: 406 MB.",
+    "curvesButton": "Descargar curvas (ZIP)"
   },
   "help": {
     "title": "Atajos de teclado",

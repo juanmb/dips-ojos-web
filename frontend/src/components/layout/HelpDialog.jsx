@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'preact/hooks'
 import { t } from '../../i18n/index.js'
 import { DocView } from '../docs/DocView.jsx'
+import { DownloadsView } from '../docs/DownloadsView.jsx'
 
 const TABS = [
   { id: 'about', labelKey: 'docs.aboutTitle' },
   { id: 'tutorial', labelKey: 'docs.tutorialTitle' },
   { id: 'examples', labelKey: 'docs.examplesTitle' },
+  { id: 'downloads', labelKey: 'docs.downloadsTitle' },
 ]
 
 export function HelpDialog({ show, onClose }) {
@@ -40,6 +42,7 @@ export function HelpDialog({ show, onClose }) {
           {activeTab === 'about' && <DocView slug="about" />}
           {activeTab === 'tutorial' && <DocView slug="tutorial" />}
           {activeTab === 'examples' && <DocView slug="examples" />}
+          {activeTab === 'downloads' && <DownloadsView />}
         </div>
 
         <div class="flex-none modal-action">

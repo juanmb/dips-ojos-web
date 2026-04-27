@@ -34,7 +34,13 @@
     "aboutTitle": "About the project",
     "tutorialTitle": "Tutorial",
     "examplesTitle": "Examples",
+    "downloadsTitle": "Downloads",
     "helpDialogTitle": "Help & documentation"
+  },
+  "downloads": {
+    "curvesTitle": "DIPS-OJOS light curves",
+    "curvesDescription": "ZIP archive with all the light curves used in the project, in CSV format. Approximate size: 406 MB.",
+    "curvesButton": "Download curves (ZIP)"
   },
   "help": {
     "title": "Keyboard Shortcuts",
