@@ -4,7 +4,7 @@
 Generation runs in two steps so that plot styles can be iterated on without refitting:
 
     compute: fit each transit and save its data and model to CSV files (slow)
-    plot:    render each figure as a single file from those CSV files (fast)
+    plot:    render each figure as a single PDF from those CSV files (fast)
 """
 
 import logging
@@ -261,16 +261,6 @@ def compute(input_dir: Path, data_dir: Path) -> None:
     help="Output directory for the figures.",
 )
 @click.option(
-    "-F",
-    "--format",
-    "output_formats",
-    type=click.Choice(["pdf", "eps"], case_sensitive=False),
-    multiple=True,
-    default=["pdf"],
-    show_default=True,
-    help="Output format; repeat the option for several formats.",
-)
-@click.option(
     "--width",
     type=float,
     default=PaperStyle.width,
@@ -308,14 +298,13 @@ def compute(input_dir: Path, data_dir: Path) -> None:
 def plot(
     data_dir: Path,
     output_dir: Path,
-    output_formats: tuple[str, ...],
     width: float,
     panel_aspect: float,
     font_size: float,
     title_size: float,
     marker_size: float,
 ) -> None:
-    """Render each figure as a single file from the precomputed data."""
+    """Render each figure as a single PDF from the precomputed data."""
     style = PaperStyle(
         width=width,
         panel_aspect=panel_aspect,
@@ -327,10 +316,9 @@ def plot(
     for spec in FIGURES:
         records = index[index["figure"] == spec.name].sort_values("position")
         panels = [load_panel(data_dir, record, spec.events) for _, record in records.iterrows()]
-        for output_format in output_formats:
-            output_path = output_dir / f"{spec.name}.{output_format.lower()}"
-            plot_paper_figure(panels, output_path, style, spec.columns, spec.center_last_row)
-            logger.info(f"{spec.name}: {len(panels)} panels -> {output_path}")
+        output_path = output_dir / f"{spec.name}.pdf"
+        plot_paper_figure(panels, output_path, style, spec.columns, spec.center_last_row)
+        logger.info(f"{spec.name}: {len(panels)} panels -> {output_path}")
 
 
 if __name__ == "__main__":

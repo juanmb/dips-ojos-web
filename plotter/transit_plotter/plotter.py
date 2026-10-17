@@ -148,10 +148,9 @@ PAPER_RC_PARAMS = {
     "axes.formatter.use_mathtext": True,
     "axes.unicode_minus": True,
     "pdf.fonttype": 42,
-    "ps.fonttype": 42,
 }
 
-# Opaque equivalent of translucent red, as EPS does not support transparency
+# Light red, distinguishable from the red transit model
 EVENT_COLOR = "#ff8080"
 
 
