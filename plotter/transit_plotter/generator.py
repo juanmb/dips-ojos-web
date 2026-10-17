@@ -69,8 +69,11 @@ class ModelParams:
 
 @dataclass
 class TransitFitResult:
-    """Result of fitting and plotting a single transit."""
+    """Result of fitting a single transit, with the data and model inside the plot window."""
 
+    time: np.ndarray
+    flux: np.ndarray
+    model_flux: np.ndarray | None
     t0_fitted: float | None
     ttv_minutes: float | None
     rms_residuals: float | None
@@ -105,7 +108,7 @@ def _find_initial_t0(time: np.ndarray, flux: np.ndarray) -> float:
         return time[np.argmin(flux)]
 
 
-def _process_single_transit(
+def _fit_single_transit(
     time: np.ndarray,
     flux: np.ndarray,
     t0_expected: float,
@@ -116,12 +119,10 @@ def _process_single_transit(
     a_global: float,
     period: float,
     duration: float,
-    output_path: Path,
-    dpi: int,
     skip_fitting: bool,
 ) -> TransitFitResult | None:
     """
-    Process a single transit and generate its plot.
+    Fit a single transit and extract the data around it.
 
     Returns TransitFitResult on success, None on failure.
     """
@@ -175,25 +176,50 @@ def _process_single_transit(
         rms_residuals = float(np.sqrt(np.mean(residuals**2)))
         ttv_minutes = (t0_fitted - t0_expected) * 24 * 60
 
-    plot_transit(
+    return TransitFitResult(
         time=time_plot,
         flux=flux_plot,
         model_flux=model_flux,
         t0_fitted=t0_fitted,
-        t0_expected=t0_expected,
         ttv_minutes=ttv_minutes,
         rms_residuals=rms_residuals,
-        output_path=output_path,
-        dpi=dpi,
-        transit_index=transit_num,
     )
 
-    logger.debug(f"Saved {output_path.name}")
 
-    return TransitFitResult(
-        t0_fitted=t0_fitted,
-        ttv_minutes=ttv_minutes,
-        rms_residuals=rms_residuals,
+def fit_transit(filepath: Path, transit_num: int) -> TransitFitResult | None:
+    """
+    Fit one transit of a light curve file, using the same procedure as process_file.
+
+    Args:
+        filepath: Path to the input CSV file.
+        transit_num: Transit number within the file (1-indexed, as in the plot filenames).
+
+    Returns:
+        TransitFitResult, or None if the transit does not exist or could not be extracted.
+    """
+    time, flux, params, _ = load_light_curve(filepath)
+    period = params["Periodo_orbital_d"]
+    duration = params.get("Duracion_d", 0.2)
+    expected_t0s = calculate_expected_transit_times(time, params["Epoca_BJDS"], period)
+    if not 1 <= transit_num <= len(expected_t0s):
+        logger.error(f"{filepath.name} has no transit {transit_num}")
+        return None
+
+    model_params = ModelParams.from_transit_params(params)
+    rp_global, a_global = fit_global_parameters(time, flux, params, expected_t0s)
+
+    return _fit_single_transit(
+        time=time,
+        flux=flux,
+        t0_expected=expected_t0s[transit_num - 1],
+        transit_num=transit_num,
+        params=params,
+        model_params=model_params,
+        rp_global=rp_global,
+        a_global=a_global,
+        period=period,
+        duration=duration,
+        skip_fitting=False,
     )
 
 
@@ -322,7 +348,7 @@ def process_file(
     for transit_num, t0_expected, plot_path in transits_to_process:
         logger.debug(f"Processing transit {transit_num}/{len(expected_t0s)}")
 
-        fit_result = _process_single_transit(
+        fit_result = _fit_single_transit(
             time=time,
             flux=flux,
             t0_expected=t0_expected,
@@ -333,10 +359,23 @@ def process_file(
             a_global=a_global,
             period=period,
             duration=duration,
-            output_path=plot_path,
-            dpi=dpi,
             skip_fitting=skip_fitting,
         )
+
+        if fit_result is not None:
+            plot_transit(
+                time=fit_result.time,
+                flux=fit_result.flux,
+                model_flux=fit_result.model_flux,
+                t0_fitted=fit_result.t0_fitted,
+                t0_expected=t0_expected,
+                ttv_minutes=fit_result.ttv_minutes,
+                rms_residuals=fit_result.rms_residuals,
+                output_path=plot_path,
+                dpi=dpi,
+                transit_index=transit_num,
+            )
+            logger.debug(f"Saved {plot_path.name}")
 
         if fit_result is None:
             new_failed.append(transit_num)
