@@ -16,6 +16,7 @@ backend/.air.toml
 # Data and generated files
 data/
 plots/
+paper_figures/
 /db/
 *.db
 
